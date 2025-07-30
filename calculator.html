@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>BambooBreak - Perioperativer Fastentimer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <h1>Fastentimer</h1>
+    <p>Geben Sie den geplanten Eingriffs-Termin und das Alter Ihres Kindes an, um die passenden Regeln zu berechnen.</p>
+
+    <form id="fasting-form">
+      <label for="op-time">OP-Termin:</label>
+      <input type="datetime-local" id="op-time" required>
+
+      <fieldset>
+        <legend>Ist das Kind unter 1 Jahr alt?</legend>
+        <label>
+          <input type="radio" name="infant" value="yes"> Ja
+        </label>
+        <label>
+          <input type="radio" name="infant" value="no" checked> Nein
+        </label>
+        <button type="button" id="age-hint" class="info-button" aria-label="Warum das Alter wichtig ist">?</button>
+      </fieldset>
+
+      <div class="buttons">
+        <button type="submit" id="submit-btn">Berechnen</button>
+        <button type="button" id="reset-btn">Zurücksetzen</button>
+      </div>
+    </form>
+
+    <div id="result" class="hidden"></div>
+
+    <button onclick="location.href='index.html'" class="icon-button">Zurück zur Startseite</button>
+  </main>
+  <script src="js/calculator.js"></script>
+  <!-- Modal für Hinweise -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2 id="modal-title"></h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+</body>
+</html>

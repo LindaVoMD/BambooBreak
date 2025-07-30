@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Substanz-Auswahl – BambooBreak</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <h1>Substanz-Auswahl</h1>
+
+    <fieldset>
+      <legend>Ist das Kind unter 1 Jahr alt?</legend>
+      <label><input type="radio" name="infant" value="no" checked> Nein</label>
+      <label><input type="radio" name="infant" value="yes"> Ja</label>
+    </fieldset>
+
+    <div class="selection-row">
+      <label for="gruppe-select"><b>Essensgruppe:</b></label>
+      <select id="gruppe-select" disabled>
+        <option value="">Bitte zuerst das Alter wählen</option>
+      </select>
+
+      <label for="unterkat-select" id="unterkat-label" class="hidden"><b>Unterkategorie:</b></label>
+      <select id="unterkat-select" class="hidden"></select>
+    </div>
+
+    <div id="substanz-result" class="hidden"></div>
+    <button onclick="location.href='index.html'" class="icon-button" style="margin-top:1.5em;">Zurück zur Startseite</button>
+  </main>
+  <script src="js/substance.js"></script>
+</body>
+</html>

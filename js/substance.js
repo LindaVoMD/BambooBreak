@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function showResult(gruppe, unterkategorie) {
     let html = "";
     if (gruppe.panda) {
-      html += `<img src="../assets/${gruppe.panda}" class="panda-result" alt="Panda Illustration">`;
+      html += `<img src="assets/${gruppe.panda}" class="panda-result" alt="Panda Illustration">`;
     }
     html += `<p><b>${gruppe.gruppe}:</b></p>`;
     html += `<div style="margin-bottom:1em;">${gruppe.hinweis}</div>`;

@@ -1,0 +1,115 @@
+[
+  {
+ "id": "free_eating",
+    "phase": "Freie Nahrungsaufnahme",
+    "min": 1440,
+    "max": 999999,
+    "infant_only": false,
+    "panda": "panda_future.png",
+    "note": {
+      "title": "Keine Einschränkung nötig",
+      "text": "Der Eingriff liegt in der Zukunft. Es bestehen keine Einschränkungen für Essen und Trinken."
+    }
+  },
+
+  {
+    "id": "normal_meal",
+    "phase": "Normale Mahlzeit",
+    "min": 360,
+    "max": 9999,
+    "infant_only": false,
+    "panda": "panda_eats.png",
+    "note": {
+      "title": "Keine Einschränkung nötig",
+      "text": "Bis 6 Stunden vor der Anästhesie kann ganz normal gegessen werden."
+    }
+  },
+  {
+    "id": "light_meal",
+    "phase": "Kleine Mahlzeit erlaubt.",
+    "min": 240,
+    "max": 360,
+    "infant_only": false,
+    "panda": "panda_apple.png",
+    "note": {
+      "title": "Was ist eine kleine Mahlzeit?",
+      "text": "1 Toast mit Marmelade, 1 Glas Brei, 1 Banane, 1 Becher Milch oder Kakao."
+    }
+  },
+  {
+    "id": "clear_liquids",
+    "phase": "Klare Flüssigkeit erlaubt.",
+    "min": 60,
+    "max": 240,
+    "infant_only": false,
+    "panda": "panda_drinks.png",
+    "note": {
+      "title": "Was ist eine klare Flüssigkeit?",
+      "text": "Wasser, gesüßter Tee, Saft ohne Fruchtfleisch."
+    }
+  },
+  {
+    "id": "fasting",
+    "phase": "Bitte nüchtern bleiben.",
+    "min": 0,
+    "max": 60,
+    "infant_only": false,
+    "panda": "panda_fasting.png"
+  },
+  {
+    "id": "infant_solid_and_milk",
+    "phase": "Beikost und Milch erlaubt.",
+    "min": 360,
+    "max": 9999,
+    "infant_only": true,
+    "panda": ["panda_apple.png", "panda_nursed.png"],
+    "note": {
+      "title": "Beikost und Milch",
+      "text": "Bis 6 Stunden vor OP dürfen Kinder < 1 Jahr Beikost (Milchbrei, Joghurt, Obstpürees) und Milch (Muttermilch, Fertig- oder Kuhmilch) zu sich nehmen."
+    }
+  },
+  {
+    "id": "infant_light_and_milk",
+    "phase": "Leichte Beikost und Milch erlaubt.",
+    "min": 240,
+    "max": 360,
+    "infant_only": true,
+    "panda": ["panda_porridge.png", "panda_nursed.png"],
+    "note": {
+      "title": "Leichte Beikost und Milch",
+      "text": "6–4 Stunden vor OP sind kleine Portionen Beikost (z.B. 1 Joghurt, 1 Milchbrei) oder Milch (Muttermilch, Formulamilch oder Kuhmilch) erlaubt."
+    }
+  },
+  {
+    "id": "infant_breastmilk",
+    "phase": "Muttermilch erlaubt.",
+    "min": 180,
+    "max": 240,
+    "infant_only": true,
+    "panda": "panda_nursed.png",
+    "note": {
+      "title": "Muttermilch",
+      "text": "Bis 3 Stunden vor OP ist Muttermilch erlaubt"
+    }
+  },
+  {
+    "id": "infant_clear_liquids",
+    "phase": "Klare Flüssigkeit erlaubt.",
+    "min": 60,
+    "max": 180,
+    "infant_only": true,
+    "panda": "panda_drinks.png",
+    "note": {
+      "title": "Klare Flüssigkeit",
+      "text": "Bis 1 Stunde vor OP: Wasser, Tee oder Saft ohne Fruchtfleisch."
+    }
+  },
+  {
+    "id": "infant_fasting",
+    "phase": "Bitte nüchtern bleiben.",
+    "min": 0,
+    "max": 60,
+    "infant_only": true,
+    "panda": "panda_fasting.png"
+  }
+]

@@ -96,28 +96,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       html += `<details><summary>${rule.note.title}</summary><p>${rule.note.text}</p></details>`;
     }
 
-    // Countdown initialisieren
-    if (countdownInterval) clearInterval(countdownInterval);
-    resultDiv.innerHTML = html;
-    resultDiv.classList.remove("hidden");
-    const countdownEl = document.createElement("p");
-    countdownEl.style.fontWeight = "bold";
-    resultDiv.appendChild(countdownEl);
+// Countdown und Timer nur anzeigen, wenn nicht free_eating, fasting oder infant_fasting
+if (!["free_eating", "fasting", "infant_fasting"].includes(rule.id)) {
+  if (countdownInterval) clearInterval(countdownInterval);
+  const countdownEl = document.createElement("p");
+  countdownEl.style.fontWeight = "bold";
+  resultDiv.appendChild(countdownEl);
 
-    function updateCountdown() {
-      const now2 = new Date();
-      const remSec = Math.floor((thresholdTime - now2) / 1000);
-      if (remSec > 0) {
-        countdownEl.textContent = `Diese Regel gilt noch: ⏰ ${formatRemainingLong(remSec)}`;
-      } else {
-        countdownEl.textContent = "Diese Regel ist jetzt beendet. Bitte erneut berechnen.";
-        clearInterval(countdownInterval);
-      }
+  function updateCountdown() {
+    const now2 = new Date();
+    const remSec = Math.floor((thresholdTime - now2) / 1000);
+    if (remSec > 0) {
+      countdownEl.textContent = `Diese Regel gilt noch: ⏰ ${formatRemainingLong(remSec)}`;
+    } else {
+      countdownEl.textContent = "Diese Regel ist jetzt beendet. Bitte erneut berechnen.";
+      clearInterval(countdownInterval);
     }
-
-    updateCountdown();
-    countdownInterval = setInterval(updateCountdown, 1000);
   }
+
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+}
 
   // Submit-Handler mit Validierung
   form.addEventListener("submit", e => {

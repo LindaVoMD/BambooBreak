@@ -151,4 +151,4 @@ if (!["free_eating", "fasting", "infant_fasting"].includes(rule.id)) {
     modal.classList.add("hidden");
     if (countdownInterval) clearInterval(countdownInterval);
   });
-});
+

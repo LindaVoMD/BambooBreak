@@ -100,8 +100,8 @@
     "infant_only": true,
     "panda": "panda_drinks.png",
     "note": {
-      "title": "Klare Flüssigkeit",
-      "text": "Bis 1 Stunde vor OP: Wasser, Tee oder Saft ohne Fruchtfleisch."
+      "title": "Was ist eine klare Flüssigkeit?",
+      "text": "Wasser, gesüßter Tee, Saft ohne Fruchtfleisch."
     }
   },
   {
@@ -112,4 +112,5 @@
     "infant_only": true,
     "panda": "panda_fasting.png"
   }
+
 ]

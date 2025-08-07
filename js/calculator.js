@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const modalBody = document.getElementById("modal-body");
   const closeButton = document.querySelector(".close-button");
 
-  // Button nur aktivieren, wenn Termin gesetzt
+  // Button nur aktiv, wenn Termin gesetzt ist
   opTimeInput.addEventListener("input", () => {
     submitBtn.disabled = !opTimeInput.value;
   });
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `${String(h).padStart(2,"0")} Std ${String(m).padStart(2,"0")} Min ${String(s).padStart(2,"0")} Sek`;
   }
 
-  // Infobox zu Folgefristen (laiengerecht, nur bei passenden Regeln)
+  // Infobox für nächste Fristen
   function getNextDeadlineHTML(ruleId, opTime) {
     const toDateString = (date) =>
       date.toLocaleDateString('de-DE') + ', ' +
@@ -151,12 +151,13 @@ document.addEventListener("DOMContentLoaded", async () => {
               </details>`;
     }
 
-    // Fristen-Infobox (nur bei Mahlzeiten-/Getränke-Regeln)
-    const showFristen = showTimer && getNextDeadlineHTML(rule.id, opTime);
-    if (showFristen) {
+    // Fristen-Infobox: gleiche Optik, nur bei passenden Regeln
+    let showFristen = !["free_eating", "fasting", "infant_fasting"].includes(rule.id);
+    const nextFristenHTML = showFristen ? getNextDeadlineHTML(rule.id, opTime) : "";
+    if (showFristen && nextFristenHTML) {
       html += `<details class="regel-infobox" style="margin-top:1em;">
         <summary><b>Weitere Fristen im Überblick – Was gilt als nächstes?</b></summary>
-        ${getNextDeadlineHTML(rule.id, opTime)}
+        ${nextFristenHTML}
       </details>`;
     }
 

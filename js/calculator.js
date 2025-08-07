@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  // Element-Referenzen
   const form = document.getElementById("fasting-form");
   const opTimeInput = document.getElementById("op-time");
   const submitBtn = document.getElementById("submit-btn");
@@ -9,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const modalBody = document.getElementById("modal-body");
   const closeButton = document.querySelector(".close-button");
 
-  // Submit-Button nur aktivieren, wenn OP-Zeit gesetzt ist
+  // Button nur aktivieren, wenn Termin gesetzt
   opTimeInput.addEventListener("input", () => {
     submitBtn.disabled = !opTimeInput.value;
   });
@@ -20,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let rules = [];
   let countdownInterval = null;
 
-  // Regeln laden
+  // Regeln laden (JSON)
   try {
     const res = await fetch(rulesUrl);
     if (!res.ok) throw new Error(`Status ${res.status}`);
@@ -44,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
-  // Hilfsfunktionen
+  // Hilfsfunktionen für Anzeige
   function formatDateTime(date) {
     return date.toLocaleDateString('de-DE') + ' ' +
       String(date.getHours()).padStart(2, "0") + ":" +
@@ -57,14 +58,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `${String(h).padStart(2,"0")} Std ${String(m).padStart(2,"0")} Min ${String(s).padStart(2,"0")} Sek`;
   }
 
-  // Funktion: Infobox für nächste Fristen
+  // Infobox zu Folgefristen (laiengerecht, nur bei passenden Regeln)
   function getNextDeadlineHTML(ruleId, opTime) {
     const toDateString = (date) =>
       date.toLocaleDateString('de-DE') + ', ' +
       String(date.getHours()).padStart(2, "0") + ':' +
       String(date.getMinutes()).padStart(2, "0") + ' Uhr';
 
-    // Hilfsfunktion: n Minuten vor OP
+    // n Minuten vor OP
     const timeBeforeOp = (min) => {
       const d = new Date(opTime.getTime() - min * 60000);
       return toDateString(d);
@@ -98,12 +99,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return html !== "<ul style='margin-top:0.7em'></ul>" ? html : "";
   }
 
-  // Kernfunktion: Regel finden & Countdown anzeigen
+  // Hauptfunktion: Regel finden & Ausgabe anzeigen
   function calculateAndDisplay(opTime, isInfant) {
     const now = new Date();
     const diffMin = (opTime - now) / 60000;
 
-    // Passende Regel wählen
+    // Aktuelle Regel bestimmen
     let rule;
     if (diffMin > 1440) {
       rule = rules.find(r => r.id === "free_eating");
@@ -119,42 +120,54 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Zeitpunkt, bis zu dem die Regel gilt
+    // Bis wann gilt die Regel?
     const thresholdTime = new Date(opTime.getTime() - rule.min * 60000);
 
-    // Ausgabe-HTML zusammenbauen
+    // HTML-Ausgabe zusammenbauen
     let html = `<p><strong>${rule.phase}</strong></p>`;
     if (rule.min > 0 && !["free_eating", "fasting", "infant_fasting"].includes(rule.id)) {
       html += `<p><strong>Zuletzt bis:</strong> ${formatDateTime(thresholdTime)}</p>`;
     }
+
+    // Panda-Grafiken
     html += `<div class="panda-container">`;
     const imgs = Array.isArray(rule.panda) ? rule.panda : [rule.panda];
     imgs.forEach(img => {
       html += `<img src="${imgPath}${img}" class="panda" alt="Panda" onerror="this.style.display='none'"/>`;
     });
     html += `</div>`;
-    if (rule.note) {
-      html += `<details><summary>${rule.note.title}</summary><p>${rule.note.text}</p></details>`;
+
+    // Timer direkt unter Panda-Bildern (nur bei passenden Regeln)
+    let showTimer = !["free_eating", "fasting", "infant_fasting"].includes(rule.id);
+    if (showTimer) {
+      html += `<p id="countdown-timer" style="font-weight:bold;margin:1em 0 0.7em 0"></p>`;
     }
 
-    // Dynamische Infobox mit weiteren Fristen
-    const nextDeadlineHTML = getNextDeadlineHTML(rule.id, opTime);
-    if (nextDeadlineHTML) {
-      html += `<details style="margin-top:1.3em;">
-                <summary><b>Weitere Fristen im Überblick – Was gilt als nächstes?</b></summary>
-                ${nextDeadlineHTML}
+    // Infobox zur Regel (falls vorhanden)
+    if (rule.note) {
+      html += `<details class="regel-infobox" style="margin-top:1em;">
+                <summary>${rule.note.title}</summary>
+                <p>${rule.note.text}</p>
               </details>`;
     }
 
-    // Countdown und Timer nur anzeigen, wenn nicht free_eating, fasting oder infant_fasting
-    if (!["free_eating", "fasting", "infant_fasting"].includes(rule.id)) {
-      if (countdownInterval) clearInterval(countdownInterval);
-      resultDiv.innerHTML = html;
-      resultDiv.classList.remove("hidden");
-      const countdownEl = document.createElement("p");
-      countdownEl.style.fontWeight = "bold";
-      resultDiv.appendChild(countdownEl);
+    // Fristen-Infobox (nur bei Mahlzeiten-/Getränke-Regeln)
+    const showFristen = showTimer && getNextDeadlineHTML(rule.id, opTime);
+    if (showFristen) {
+      html += `<details class="regel-infobox" style="margin-top:1em;">
+        <summary><b>Weitere Fristen im Überblick – Was gilt als nächstes?</b></summary>
+        ${getNextDeadlineHTML(rule.id, opTime)}
+      </details>`;
+    }
 
+    // HTML in Ergebnisfeld schreiben
+    resultDiv.innerHTML = html;
+    resultDiv.classList.remove("hidden");
+
+    // Countdown-Timer aktualisieren
+    if (showTimer) {
+      if (countdownInterval) clearInterval(countdownInterval);
+      const countdownEl = document.getElementById("countdown-timer");
       function updateCountdown() {
         const now2 = new Date();
         const remSec = Math.floor((thresholdTime - now2) / 1000);
@@ -165,18 +178,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           clearInterval(countdownInterval);
         }
       }
-
       updateCountdown();
       countdownInterval = setInterval(updateCountdown, 1000);
     } else {
-      // Keine Timer-Ausgabe für free_eating / fasting / infant_fasting
       if (countdownInterval) clearInterval(countdownInterval);
-      resultDiv.innerHTML = html;
-      resultDiv.classList.remove("hidden");
     }
   }
 
-  // Submit-Handler mit Validierung
+  // Form-Submit: Berechnen
   form.addEventListener("submit", e => {
     e.preventDefault();
     const raw = opTimeInput.value;
@@ -196,7 +205,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Reset-Handler
+  // Zurücksetzen
   resetBtn.addEventListener("click", () => {
     opTimeInput.value = "";
     submitBtn.disabled = true;

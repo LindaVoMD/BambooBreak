@@ -53,7 +53,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `${String(h).padStart(2,"0")} Std ${String(m).padStart(2,"0")} Min ${String(s).padStart(2,"0")} Sek`;
   }
 
-  // Kern: Regel ermitteln & (ggf.) Countdown anzeigen
+  // Folgefristen-Infobox
+  function getNextDeadlineHTML(ruleId, opTime) {
+    const toDateString = (date) =>
+      date.toLocaleDateString('de-DE') + ', ' +
+      String(date.getHours()).padStart(2, "0") + ':' +
+      String(date.getMinutes()).padStart(2, "0") + ' Uhr';
+
+    const timeBeforeOp = (min) => {
+      const d = new Date(opTime.getTime() - min * 60000);
+      return toDateString(d);
+    };
+
+    let html = "<ul style='margin-top:0.7em'>";
+    switch (ruleId) {
+      case "normal_meal":
+        html += `<li>Eine kleine Mahlzeit ist bis <b>${timeBeforeOp(240)}</b> (4 Stunden vor OP) möglich.</li>
+                 <li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
+        break;
+      case "light_meal":
+        html += `<li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
+        break;
+      case "infant_solid_and_milk":
+        html += `<li>Kleine Portionen Beikost oder Fertigmilch/Kuhmilch sind bis <b>${timeBeforeOp(240)}</b> (4 Stunden vor OP) möglich.</li>
+                 <li>Muttermilch ist bis <b>${timeBeforeOp(180)}</b> (3 Stunden vor OP) möglich.</li>
+                 <li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
+        break;
+      case "infant_light_and_milk":
+        html += `<li>Muttermilch ist bis <b>${timeBeforeOp(180)}</b> (3 Stunden vor OP) möglich.</li>
+                 <li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
+        break;
+      default:
+        html = "";
+    }
+    html += "</ul>";
+    return html !== "<ul style='margin-top:0.7em'></ul>" ? html : "";
+  }
+
+  // Hauptfunktion: Regel ermitteln & Ausgabe aktualisieren
   function calculateAndDisplay(opTime, isInfant) {
     const now     = new Date();
     const diffMin = (opTime - now) / 60000;
@@ -90,24 +127,41 @@ document.addEventListener("DOMContentLoaded", async () => {
       html += `<img src="${imgPath}${img}" class="panda" alt="Panda" onerror="this.style.display='none'"/>`;
     });
     html += `</div>`;
+
+    // Timer (sofern nötig)
+    let showTimer = !["free_eating","fasting","infant_fasting"].includes(rule.id);
+    if (showTimer) {
+      html += `<p id="countdown-timer" style="font-weight:bold;margin:1em 0 0.7em 0"></p>`;
+    }
+
+    // Info-Box zur Regel (note)
     if (rule.note) {
-      html += `<details><summary>${rule.note.title}</summary><p>${rule.note.text}</p></details>`;
+      html += `<details class="regel-infobox" style="margin-top:1em;">
+                 <summary>${rule.note.title}</summary>
+                 <p>${rule.note.text}</p>
+               </details>`;
+    }
+
+    // Folgefristen-Infobox (nur für die gewünschten IDs)
+    const idsForFristen = ["normal_meal", "light_meal", "infant_solid_and_milk", "infant_light_and_milk"];
+    if (idsForFristen.includes(rule.id)) {
+      const fristenHTML = getNextDeadlineHTML(rule.id, opTime);
+      if (fristenHTML) {
+        html += `<details class="regel-infobox" style="margin-top:1em;">
+          <summary><b>Weitere Fristen im Überblick – Was gilt als nächstes?</b></summary>
+          ${fristenHTML}
+        </details>`;
+      }
     }
 
     // Ausgabe ins DOM
     resultDiv.innerHTML = html;
     resultDiv.classList.remove("hidden");
 
-    // Nur wenn es keine der „No-Timer“-Phasen ist:
-    if (!["free_eating","fasting","infant_fasting"].includes(rule.id)) {
-      // Bestehenden Timer löschen
+    // Timer einbauen
+    if (showTimer) {
       if (countdownInterval) clearInterval(countdownInterval);
-      // Countdown-Element anfügen
-      const countdownEl = document.createElement("p");
-      countdownEl.style.fontWeight = "bold";
-      resultDiv.appendChild(countdownEl);
-
-      // Countdown-Loop
+      const countdownEl = document.getElementById("countdown-timer");
       function updateCountdown() {
         const rem = Math.floor((thresholdTime - new Date())/1000);
         if (rem > 0) {
@@ -154,5 +208,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
 });
-
-

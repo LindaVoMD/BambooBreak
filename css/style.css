@@ -188,66 +188,41 @@ summary {
   font-size: 1.5rem;
   cursor: pointer;
 }
-.selection-row {
+.selection-block {
+  margin-top: 1.25rem;        
   display: grid;
-  grid-template-columns:minmax(220px,1fr) minmax(220px,1fr);
-  gap: 1rem 1.2rem;
-  align-items:start;
-  margin-bottom: 1.5em;
+  grid-template-columns: 1fr;   
+  row-gap: 1rem;
 }
-.selection-row .field {
-  display: flex;
-  flex-direction: column;
+
+.selection-block .field {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  align-items: center;
+  column-gap: .75rem;
 }
-.selection-row .field label {
-  margin: 0 0 .35em 0;
-  font-weight: bold;
+
+.selection-block .field label {
+  margin: 0;
   white-space: nowrap;
+  font-weight: bold;
 }
-.selection-row .field select {
+
+.selection-block .field select {
   width: 100%;
-  padding: .5em;
+  padding: .55rem .6rem;
   border-radius: 6px;
   border: 1px solid #b3e0ea;
   font-size: 1rem;
   background: #fff;
   color: #006677;
-
 }
-@media (max-width: 700px) {
-  .selection-row {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+
+@media (max-width: 540px) {
+  .selection-block .field {
+    grid-template-columns: 1fr; 
+    row-gap: .35rem;
   }
-}
-#substanz-result {
-  margin-top: 2rem;
-  padding: 1.5rem 1.2rem;
-  background-color: #f0f9fb;
-  border-radius: 16px;
-  border-left: 4px solid #0099a8;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  max-width: 430px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-  transition: box-shadow 0.2s;
-}
-#substanz-result:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-}
-.panda-result {
-  display: block;
-  margin: 1em auto 1.4em auto;
-  max-width: 110px;
-  background: #e8f4f7;
-  border-radius: 12px;
-  padding: 0.4em;
-}
-
-@media (max-width:768px) {
-  main { margin:1rem; padding:1.5rem; }
-  .footer-buttons { flex-direction:column; gap:0.5rem; }
 }
 .modal.hidden { display: none !important; }
 
@@ -265,6 +240,7 @@ details.regel-infobox[open] {
   box-shadow: 0 2px 8px rgba(0,153,168,0.06);
   transition: box-shadow 0.2s;
 }
+
 
 
 

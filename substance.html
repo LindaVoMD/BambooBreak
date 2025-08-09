@@ -10,22 +10,27 @@
   <main>
     <h1>Essen oder Trinken wählen</h1>
 
-    <fieldset>
-      <legend>Ist das Kind unter 1 Jahr alt?</legend>
-      <label><input type="radio" name="infant" value="no" checked> Nein</label>
-      <label><input type="radio" name="infant" value="yes"> Ja</label>
-    </fieldset>
+   <fieldset>
+  <legend>Ist das Kind unter 1 Jahr alt?</legend>
+  <label><input type="radio" name="infant" value="no" checked> Nein</label>
+  <label><input type="radio" name="infant" value="yes"> Ja</label>
+</fieldset>
 
-    <div class="selection-row">
-      <div class="field">
-      <label for="gruppe-select">Essen/ Trinken:</label>
-      <select id="gruppe-select" disabled>...</select>
-      </div>
-    </div class="field">
-      <label for="unterkat-select" id="unterkat-label" class="hidden">Unterkategorie:</label>
-    <select id="unterkat-select" class_"hidden"></select>
-    </div>
+<div class="selection-block">
+  <div class="field">
+    <label for="gruppe-select">Essen/Trinken:</label>
+    <select id="gruppe-select" disabled>
+      <option value="">Bitte zuerst das Alter wählen</option>
+    </select>
   </div>
+
+  <div class="field" id="unterkat-field">
+    <label for="unterkat-select" id="unterkat-label" class="hidden">Unterkategorie:</label>
+    <select id="unterkat-select" class="hidden"></select>
+  </div>
+</div>
+
+<div id="substanz-result" class="hidden"></div>
 
     <div id="substanz-result" class="hidden"></div>
     <button onclick="location.href='index.html'" class="icon-button" style="margin-top:1.5em;">Zurück zur Startseite</button>
@@ -33,6 +38,7 @@
   <script src="js/substance.js"></script>
 </body>
 </html>
+
 
 
 

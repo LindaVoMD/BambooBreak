@@ -253,16 +253,17 @@ summary {
 details.regel-infobox,
 details.regel-infobox[open] {
   background-color: #eef9fc;
-  padding: 0.7em 1em 0.7em 1em;
+  padding: 0.7em;
   border-left: 4px solid #0099a8;
   border-radius: 5px;
   margin-top: 1.1em;
   margin-bottom: 0.8em;
-  color: #006677;
-  font-size: 1.07em;
+  color: inherit;
+  font-size: inherit;
   font-family: inherit;
   box-shadow: 0 2px 8px rgba(0,153,168,0.06);
   transition: box-shadow 0.2s;
 }
+
 
 

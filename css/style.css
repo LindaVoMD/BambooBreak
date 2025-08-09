@@ -143,11 +143,17 @@ summary {
 }
 .footer-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0.8rem;
   margin-top: 3rem;
   padding-top: 1rem;
   border-top: 1px solid #ccc;
 }
+
+.footer-buttons > button {
+  flex: 0 0 auto;
+}
+
 .icon-button {
   background: none;
   border: none;
@@ -240,6 +246,7 @@ details.regel-infobox[open] {
   box-shadow: 0 2px 8px rgba(0,153,168,0.06);
   transition: box-shadow 0.2s;
 }
+
 
 
 

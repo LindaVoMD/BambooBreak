@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const fristenHTML = getNextDeadlineHTML(rule.id, opTime);
       if (fristenHTML) {
         html += `<details class="regel-infobox" style="margin-top:1em;">
-                   <summary><b>Weitere Fristen im Überblick – Was gilt als nächstes?</b></summary>
+                   <summary>Weitere Fristen im Überblick – Was gilt als nächstes?</b></summary>
                    ${fristenHTML}
                  </details>`;
       }
@@ -224,3 +224,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (countdownInterval) clearInterval(countdownInterval);
   });
 });
+

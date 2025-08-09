@@ -189,34 +189,35 @@ summary {
   cursor: pointer;
 }
 .selection-row {
-  display: flex;
-  align-items: center;
-  gap: 1.2em;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns:minmax(220px,1fr) minmax(220px,1fr);
+  gap: 1rem 1.2rem;
+  align-items:start;
   margin-bottom: 1.5em;
 }
-.selection-row label {
-  margin-bottom: 0;
+.selection-row .field {
+  display: flex;
+  flex-direction: column;
+}
+.selection-row .field label {
+  margin: 0 0 .35em 0;
+  font-weight: bold;
   white-space: nowrap;
 }
-.selection-row select {
-  min-width: 170px;
-  margin-right: 0.5em;
-  padding: 0.5em;
+.selection-row .field select {
+  width: 100%;
+  padding: .5em;
   border-radius: 6px;
   border: 1px solid #b3e0ea;
   font-size: 1rem;
   background: #fff;
   color: #006677;
-}
-#unterkat-select {
-  margin-right: 0.5em;
+
 }
 @media (max-width: 700px) {
   .selection-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5em;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 }
 #substanz-result {
@@ -264,6 +265,7 @@ details.regel-infobox[open] {
   box-shadow: 0 2px 8px rgba(0,153,168,0.06);
   transition: box-shadow 0.2s;
 }
+
 
 
 

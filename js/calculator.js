@@ -1,4 +1,10 @@
-
+/* OP-Termin – Essensphasen (JSON-getrieben mit Panda-PNGs)
+   Änderungen:
+   - Kein Auto-Prefill/Render beim Laden
+   - "Beispiel setzen" entfernt
+   - Reset-Button
+   - Zusatzanzeige >24h: "X T Y h Z min"
+*/
 (function () {
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -9,23 +15,20 @@
       lightMeal: {
         title: "Was ist eine leichte Mahlzeit?",
         items: [
-          "z. B. Toast/Zwieback, klare Suppe ohne Einlage",
-          "keine fetten Speisen, kein Fleisch, kein rohes Gemüse"
+          "z. B. 1 Toast mit Marmelade, 1 Zwieback oder 1 Becher Milch/ Kakao"
         ]
       },
       clearFluids: {
         title: "Was ist eine klare Flüssigkeit?",
         items: [
           "Wasser, ungesüßter Tee",
-          "klarer Fruchtsaft ohne Fruchtfleisch",
-          "keine Milch, kein Orangensaft mit Fruchtfleisch"
+          "klarer Fruchtsaft ohne Fruchtfleisch"
         ]
       },
       smallBeikost: {
         title: "Was ist eine kleine Portion Beikost?",
         items: [
-          "ca. 1/2 Standardportion Brei oder Fläschchen",
-          "ohne zusätzliche Fette/Öle"
+          "ca. 1/2 Standardportion Brei oder Fläschchen"
         ]
       }
     },
@@ -95,12 +98,20 @@
     const ss = s % 60;
     return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
   }
+  function fmtDHM(msLeft) {
+    if (msLeft < 0) msLeft = 0;
+    const totalMin = Math.floor(msLeft / 60000);
+    const days = Math.floor(totalMin / (60*24));
+    const hours = Math.floor((totalMin % (60*24)) / 60);
+    const mins = totalMin % 60;
+    return `${days} T ${hours} h ${mins} min`;
+  }
 
   // ---------- DOM ---------------------------------------------------------
   const opInput = $("#opDateTime");
   const ageRadios = $$('input[name="ageGroup"]');
   const calcBtn = $("#calcBtn");
-  const nowBtn = $("#nowBtn");
+  const resetBtn = $("#resetBtn");
   const validation = $("#validation");
   const list = $("#phase-list");
 
@@ -176,12 +187,16 @@
       timer.dataset.deadline = until.getTime().toString();
       timer.setAttribute("aria-live", "polite");
 
+      const timerAlt = document.createElement("div");
+      timerAlt.className = "timer-alt hidden"; // wird bei >24h angezeigt
+
       const when = document.createElement("div");
       when.className = "until";
       when.textContent = `bis ${toHM(until)} (${cutoffLabel})`;
 
       meta.appendChild(timer);
       meta.appendChild(when);
+      meta.appendChild(timerAlt);
 
       if (infoKey && CONFIG.infoTexts?.[infoKey]) {
         const btn = document.createElement("button");
@@ -262,6 +277,18 @@
       el.textContent = fmtClock(msLeft);
 
       const card = el.closest(".phase-card");
+      const alt = card.querySelector(".timer-alt");
+
+      // Zusatzanzeige in Tagen, Stunden, Minuten falls > 24h
+      if (alt) {
+        if (msLeft >= 24 * 3600 * 1000) {
+          alt.textContent = fmtDHM(msLeft);
+          alt.classList.remove("hidden");
+        } else {
+          alt.classList.add("hidden");
+        }
+      }
+
       card.classList.remove("state-ending-soon", "state-expired", "state-allowed");
       if (msLeft <= 0) card.classList.add("state-expired");
       else if (msLeft <= 30 * 60 * 1000) card.classList.add("state-ending-soon");
@@ -288,32 +315,17 @@
   $$('input[name="ageGroup"]').forEach(r => r.addEventListener("change", onAnyChange));
   $("#opDateTime").addEventListener("change", onAnyChange);
   $("#calcBtn").addEventListener("click", (e) => { e.preventDefault(); render(); });
-  $("#nowBtn").addEventListener("click", () => {
-    const now = new Date();
-    const example = new Date(now.getTime() + 8 * 3600 * 1000);
-    const y = example.getFullYear();
-    const m = String(example.getMonth() + 1).padStart(2, "0");
-    const d = String(example.getDate()).padStart(2, "0");
-    const hh = String(example.getHours()).padStart(2, "0");
-    const mm = String(example.getMinutes()).padStart(2, "0");
-    $("#opDateTime").value = `${y}-${m}-${d}T${hh}:${mm}`;
-    render();
+  $("#resetBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    stopTicking();
+    $("#opDateTime").value = "";
+    $("#phase-list").innerHTML = "";
+    $("#validation").textContent = "";
   });
   window.addEventListener("beforeunload", stopTicking);
 
   (async function init() {
-    // Prefill: nächste volle Stunde + 8h
-    const now = new Date();
-    const nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 0, 0);
-    const example = new Date(nextHour.getTime() + 8 * 3600 * 1000);
-    const y = example.getFullYear();
-    const m = String(example.getMonth() + 1).padStart(2, "0");
-    const d = String(example.getDate()).padStart(2, "0");
-    const hh = String(example.getHours()).padStart(2, "0");
-    const mm = String(example.getMinutes()).padStart(2, "0");
-    $("#opDateTime").value = `${y}-${m}-${d}T${hh}:${mm}`;
-
     CONFIG = await loadConfig();
-    render();
+    // Kein Auto-Render / kein Prefill: Seite bleibt leer bis zur ersten Eingabe
   })();
 })();

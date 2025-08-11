@@ -1,28 +1,44 @@
 (function () {
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  // ---------- DOM Helpers ----------
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  // ---------- Utils -------------------------------------------------------
-  const pad = (n) => n.toString().padStart(2, "0");
-  const toHM = (d) => d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  // ---------- DOM Elements ----------
+  const opInput     = $("#opDateTime");               // <input type="datetime-local">
+  const ageRadios   = $$('input[name="ageGroup"]');   // values: "gte1" | "lt1"
+  const calcBtn     = $("#calcBtn");
+  const resetBtn    = $("#resetBtn");
+  const validation  = $("#validation");
+  const list        = $("#phase-list");
+
+  // Modal
+  const modal       = $("#info-modal");
+  const modalTitle  = $("#modal-title");
+  const modalBody   = $("#modal-body");
+
+  // ---------- State ----------
+  let RULES = null;           // gefetchedes JSON
+  let tickHandle = null;
+
+  // ---------- Utils ----------
+  const pad = n => String(n).padStart(2, "0");
+  const toHM = d => d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  const normalizeMax = v => (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
 
   function parseLocalDateTime(value) {
     if (!value) return null;
     const [date, time] = value.split("T");
     if (!date || !time) return null;
     const [y, m, d] = date.split("-").map(Number);
-    const [hh, mm] = time.split(":").map(Number);
+    const [hh, mm]  = time.split(":").map(Number);
     return new Date(y, m - 1, d, hh, mm, 0, 0);
   }
-  function hoursUntil(opDate) {
-    return (opDate.getTime() - Date.now()) / 36e5;
-  }
-  function deadlineFor(opDate, hoursBefore) {
-    return new Date(opDate.getTime() - hoursBefore * 3600 * 1000);
-  }
+  const hoursUntil = (opDate) => (opDate.getTime() - Date.now()) / 36e5;
+  const deadlineFor = (opDate, hoursBefore) => new Date(opDate.getTime() - hoursBefore * 3600 * 1000);
+
   function fmtClock(msLeft) {
     if (msLeft < 0) msLeft = 0;
-    const s = Math.floor(msLeft / 1000);
+    const s  = Math.floor(msLeft / 1000);
     const hh = Math.floor(s / 3600);
     const mm = Math.floor((s % 3600) / 60);
     const ss = s % 60;
@@ -31,29 +47,18 @@
   function fmtDHM(msLeft) {
     if (msLeft < 0) msLeft = 0;
     const totalMin = Math.floor(msLeft / 60000);
-    const days = Math.floor(totalMin / (60*24));
-    const hours = Math.floor((totalMin % (60*24)) / 60);
-    const mins = totalMin % 60;
+    const days  = Math.floor(totalMin / (60 * 24));
+    const hours = Math.floor((totalMin % (60 * 24)) / 60);
+    const mins  = totalMin % 60;
     return `${days} T ${hours} h ${mins} min`;
   }
-  const normalizeMax = (v) => (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
 
-  // ---------- DOM ---------------------------------------------------------
-  const opInput = $("#opDateTime");
-  const ageRadios = $$('input[name="ageGroup"]');
-  const calcBtn = $("#calcBtn");
-  const resetBtn = $("#resetBtn");
-  const validation = $("#validation");
-  const list = $("#phase-list");
-
-  // Modal
-  const modal = $("#info-modal");
-  const modalTitle = $("#modal-title");
-  const modalBody = $("#modal-body");
-  function showModalFromConfig(key) {
-    const info = CONFIG?.infoTexts?.[key];
+  // ---------- Modal ----------
+  function openModalFromInfoKey(key) {
+    const info = RULES?.infoTexts?.[key];
     if (!info) return;
     modalTitle.textContent = info.title || "Info";
+    modalBody.innerHTML = "";
     const ul = document.createElement("ul");
     ul.className = "bullet";
     (info.items || []).forEach(t => {
@@ -61,28 +66,21 @@
       li.textContent = t;
       ul.appendChild(li);
     });
-    modalBody.innerHTML = "";
     modalBody.appendChild(ul);
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
   }
-  function hideModal() {
+  function closeModal() {
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   }
-  modal.addEventListener("click", (e) => {
-    if (e.target.classList.contains("modal__backdrop")) hideModal();
-  });
-  modal.querySelector(".modal__close").addEventListener("click", hideModal);
-  $$("[data-close]", modal).forEach(el => el.addEventListener("click", hideModal));
+  modal.addEventListener("click", e => { if (e.target.classList.contains("modal__backdrop")) closeModal(); });
+  modal.querySelector(".modal__close")?.addEventListener("click", closeModal);
+  $$("[data-close]", modal).forEach(el => el.addEventListener("click", closeModal));
 
-  // ---------- State -------------------------------------------------------
-  let CONFIG = null;
-  let TICK_HANDLE = null;
-
-  // ---------- Rendering ---------------------------------------------------
+  // ---------- Rendering ----------
   function createPhaseCard({ imageSrc, imageAlt, title, until, cutoffLabel, infoKey, noTimer }) {
     const card = document.createElement("article");
     card.className = "phase-card state-allowed";
@@ -94,8 +92,8 @@
     img.className = "phase-card__img";
     img.src = imageSrc || "";
     img.alt = imageAlt || "";
-    img.decoding = "async";
     img.loading = "lazy";
+    img.decoding = "async";
     media.appendChild(img);
 
     const content = document.createElement("div");
@@ -112,49 +110,55 @@
 
       const timer = document.createElement("div");
       timer.className = "timer";
-      timer.dataset.deadline = until.getTime().toString();
+      timer.dataset.deadline = String(until.getTime());
       timer.setAttribute("aria-live", "polite");
 
       const timerAlt = document.createElement("div");
-      timerAlt.className = "timer-alt hidden"; // wird bei >24h angezeigt
+      timerAlt.className = "timer-alt hidden"; // >24h Anzeige
 
       const when = document.createElement("div");
       when.className = "until";
       when.textContent = `bis ${toHM(until)} (${cutoffLabel})`;
 
-      meta.appendChild(timer);
-      meta.appendChild(when);
-      meta.appendChild(timerAlt);
+      meta.append(timer, when, timerAlt);
 
-      if (infoKey && CONFIG.infoTexts?.[infoKey]) {
+      if (infoKey && RULES.infoTexts?.[infoKey]) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "info-btn";
-        btn.textContent = CONFIG.infoTexts[infoKey].title || "Info";
-        btn.addEventListener("click", () => showModalFromConfig(infoKey));
+        btn.textContent = RULES.infoTexts[infoKey].title || "Info";
+        btn.addEventListener("click", () => openModalFromInfoKey(infoKey));
         meta.appendChild(btn);
       }
-
       content.appendChild(meta);
     } else {
-      const note = document.createElement("p");
-      note.className = "phase-card__note";
-      note.textContent = "Nur Wasser zum Spülen des Mundes, bitte nichts trinken/essen.";
-      content.appendChild(note);
+      // NPO: bewusst KEIN Timer
+      if (infoKey && RULES.infoTexts?.[infoKey]) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "info-btn";
+        btn.textContent = RULES.infoTexts[infoKey].title || "Info";
+        btn.addEventListener("click", () => openModalFromInfoKey(infoKey));
+        content.appendChild(btn);
+      }
     }
 
-    card.appendChild(media);
-    card.appendChild(content);
+    card.append(media, content);
     return card;
   }
 
   function render() {
-    if (!CONFIG) return;
+    if (!RULES) {
+      validation.textContent = "Regelwerk konnte nicht geladen werden.";
+      list.innerHTML = "";
+      return;
+    }
+
     validation.textContent = "";
     list.innerHTML = "";
 
     const ageGroup = ageRadios.find(r => r.checked)?.value || "gte1";
-    const group = CONFIG.groups?.[ageGroup];
+    const group = RULES.groups?.[ageGroup];
     if (!group) { validation.textContent = "Konfiguration für die gewählte Altersgruppe fehlt."; return; }
 
     const opDate = parseLocalDateTime(opInput.value);
@@ -166,13 +170,13 @@
     const win = (group.windows || []).find(w => deltaH >= w.min && deltaH < normalizeMax(w.max));
     if (!win) { validation.textContent = "Kein passendes Zeitfenster gefunden."; return; }
 
-    (win.phases || []).forEach(key => {
-      const def = group.phaseDefs?.[key];
+    (win.phases || []).forEach(code => {
+      const def = group.phaseDefs?.[code];
       if (!def) return;
 
       let until = null, cutoffLabel = "";
       if (!def.noTimer) {
-        const cutoffH = group.cutoffs?.[key];
+        const cutoffH = group.cutoffs?.[code];
         if (typeof cutoffH === "number") {
           until = deadlineFor(opDate, cutoffH);
           cutoffLabel = `✕ ${cutoffH} h vor OP`;
@@ -182,11 +186,11 @@
       const card = createPhaseCard({
         imageSrc: def.imageSrc,
         imageAlt: def.imageAlt,
-        title: def.title,
+        title:    def.title,
         until,
         cutoffLabel,
-        infoKey: def.infoKey,
-        noTimer: !!def.noTimer
+        infoKey:  def.infoKey,
+        noTimer:  !!def.noTimer
       });
       list.appendChild(card);
     });
@@ -194,20 +198,22 @@
     startTicking();
   }
 
-  function startTicking() { stopTicking(); tick(); TICK_HANDLE = setInterval(tick, 1000); }
-  function stopTicking() { if (TICK_HANDLE) clearInterval(TICK_HANDLE); TICK_HANDLE = null; }
+  // ---------- Ticker ----------
   function tick() {
     const now = Date.now();
-    const timers = $$(".timer", list);
-    timers.forEach(el => {
+    $$(".timer", list).forEach(el => {
       const deadline = Number(el.dataset.deadline || "0");
       const msLeft = deadline - now;
       el.textContent = fmtClock(msLeft);
 
       const card = el.closest(".phase-card");
-      const alt = card.querySelector(".timer-alt");
+      const alt  = card.querySelector(".timer-alt");
 
-      // Zusatzanzeige in Tagen, Stunden, Minuten falls > 24h
+      card.classList.remove("state-ending-soon", "state-expired", "state-allowed");
+      if (msLeft <= 0) card.classList.add("state-expired");
+      else if (msLeft <= 30 * 60 * 1000) card.classList.add("state-ending-soon");
+      else card.classList.add("state-allowed");
+
       if (alt) {
         if (msLeft >= 24 * 3600 * 1000) {
           alt.textContent = fmtDHM(msLeft);
@@ -216,52 +222,41 @@
           alt.classList.add("hidden");
         }
       }
-
-      card.classList.remove("state-ending-soon", "state-expired", "state-allowed");
-      if (msLeft <= 0) card.classList.add("state-expired");
-      else if (msLeft <= 30 * 60 * 1000) card.classList.add("state-ending-soon");
-      else card.classList.add("state-allowed");
     });
   }
+  function startTicking(){ stopTicking(); tick(); tickHandle = setInterval(tick, 1000); }
+  function stopTicking(){ if (tickHandle) clearInterval(tickHandle); tickHandle = null; }
 
-  // ---------- Daten laden (ohne Fallback) ---------------------------------
-  async function loadConfigStrict() {
-    const url = "data/fastingrules.json";
-    try {
-      const res = await fetch(url, { cache: "no-cache" });
-      if (!res.ok) throw new Error(`HTTP ${res.status} beim Laden von ${url}`);
-      const json = await res.json();
-      // Minimalvalidierung
-      if (!json.groups || !json.infoTexts) throw new Error("Ungültiges JSON-Schema");
-      return json;
-    } catch (e) {
-      // Sichtbarer Fehler für Nutzer:innen
-      validation.textContent = "Regelwerk konnte nicht geladen werde";
-      // Steuerung deaktivieren, um Missverständnisse zu vermeiden
-      calcBtn.disabled = true;
-      opInput.disabled = true;
-      ageRadios.forEach(r => r.disabled = true);
-      return null;
-    }
-  }
-
-  // ---------- Events ------------------------------------------------------
+  // ---------- Events ----------
   const onAnyChange = () => render();
-  $$('input[name="ageGroup"]').forEach(r => r.addEventListener("change", onAnyChange));
-  $("#opDateTime").addEventListener("change", onAnyChange);
-  $("#calcBtn").addEventListener("click", (e) => { e.preventDefault(); render(); });
-  $("#resetBtn").addEventListener("click", (e) => {
+  ageRadios.forEach(r => r.addEventListener("change", onAnyChange));
+  opInput.addEventListener("change", onAnyChange);
+  calcBtn.addEventListener("click", (e) => { e.preventDefault(); render(); });
+  resetBtn.addEventListener("click", (e) => {
     e.preventDefault();
     stopTicking();
-    $("#opDateTime").value = "";
-    $("#phase-list").innerHTML = "";
-    $("#validation").textContent = "";
+    opInput.value = "";
+    list.innerHTML = "";
+    validation.textContent = "";
   });
   window.addEventListener("beforeunload", stopTicking);
 
-  // ---------- Init --------------------------------------------------------
-  (async function init() {
-    CONFIG = await loadConfigStrict();
-    // Kein Auto-Render / kein Prefill
-  })();
+  // ---------- Init ----------
+  document.addEventListener("DOMContentLoaded", async () => {
+    const rulesUrl = "data/fastingrules.json";
+    try {
+      const res = await fetch(rulesUrl, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      RULES = await res.json();
+
+      // sehr leichte Validierung auf erwartete Keys
+      if (!RULES.groups || !RULES.infoTexts) throw new Error("Ungültiges Regelwerk");
+      validation.textContent = "";
+    } catch (err) {
+      console.error("Regeln konnten nicht geladen werden:", err);
+      validation.textContent = "Regelwerk konnte nicht geladen werden.";
+      RULES = null;
+      return;
+    }
+  });
 })();

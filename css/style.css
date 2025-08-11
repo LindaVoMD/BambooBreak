@@ -1,3 +1,8 @@
+/* Base: Box-Modell & Bild-Defaults */
+*, *::before, *::after { box-sizing: border-box; }
+img { max-width: 100%; height: auto; vertical-align: middle; }
+
+/* ===== Grundlayout ===== */
 body {
   font-family: Arial, sans-serif;
   background-color: #e8f4f7;
@@ -13,19 +18,13 @@ main {
   border-radius: 10px;
   box-shadow: 0 0 12px rgba(0,0,0,0.1);
 }
-h1 {
-  text-align: center;
-  color: #006677;
-}
-.page-header .subtitle {
-  text-align: center;
-  margin: .4rem 0 0 0;
-  color: #276a77;
-}
+h1 { text-align: center; color: #006677; }
+.page-header .subtitle { text-align: center; margin: .4rem 0 0 0; color: #276a77; }
 
-/* Form-/Controls-Bereich */
+/* ===== Form-/Controls-Bereich ===== */
 .controls { display: flex; flex-direction: column; }
 .controls .label, .controls legend { margin-top: 1rem; font-weight: bold; }
+#age-hint { margin-top: .5rem; } /* mehr Abstand unter Radiogroup */
 
 input[type="datetime-local"] {
   padding: 0.5rem;
@@ -36,7 +35,7 @@ input[type="datetime-local"] {
   background:#fff;
 }
 
-/* Segmented Radiogroup (≥ 1 Jahr / < 1 Jahr) */
+/* Segmented Radiogroup */
 .segmented {
   display: inline-flex;
   background: #eef6f8;
@@ -44,14 +43,8 @@ input[type="datetime-local"] {
   padding: .25rem;
   gap: .25rem;
 }
-.segmented__item {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-.segmented__item input[type="radio"] {
-  position: absolute; inset: 0; opacity: 0; pointer-events: none;
-}
+.segmented__item { position: relative; display: inline-flex; align-items: center; }
+.segmented__item input[type="radio"] { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
 .segmented__item span {
   display: inline-block;
   padding: .45rem .9rem;
@@ -61,12 +54,9 @@ input[type="datetime-local"] {
   cursor: pointer;
   user-select: none;
 }
-.segmented__item input[type="radio"]:checked + span {
-  background: #0aa3b4;
-  color: #fff;
-}
+.segmented__item input[type="radio"]:checked + span { background: #0aa3b4; color: #fff; }
 
-/* Buttons (kompatibel zu .btn, .btn-primary, .btn-ghost) */
+/* Buttons */
 .actions { margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
 .btn {
   flex: 1 0 auto;
@@ -82,32 +72,15 @@ input[type="datetime-local"] {
 }
 .btn:hover { background-color: #007c8c; }
 .btn-primary { background-color: #0099a8; }
-.btn-ghost {
-  background: #f0f9fb;
-  color: #006677;
-  border: 1px solid #b3e0ea;
-}
+.btn-ghost { background: #f0f9fb; color: #006677; border: 1px solid #b3e0ea; }
 .btn-ghost:hover { background:#e0f3f6; }
 
 /* Status-/Validierungstext */
-.validation {
-  margin-top: .7rem;
-  color: #c47b00;
-  font-weight: 600;
-}
+.validation { margin-top: .7rem; color: #c47b00; font-weight: 600; }
 
-.panda {           /* Einzelbild (z. B. Info-Seite) */
-  max-width: 120px;
-  height: auto;
-}
-
-.panda-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin: 2.5rem 0;
-}
-
+/* ===== Panda-Buttons (Startseite etc.) ===== */
+.panda { max-width: 120px; height: auto; }
+.panda-buttons { display: flex; justify-content: center; gap: 2rem; margin: 2.5rem 0; }
 .panda-btn {
   background: #f0f9fb;
   border: 2px solid #0099a8;
@@ -121,140 +94,95 @@ input[type="datetime-local"] {
   width: 170px;
   transition: transform 0.1s;
 }
-
-.panda-btn img {   /* WICHTIG: Bildgröße begrenzen */
-  max-width: 90px;
-  height: auto;
-  margin-bottom: 0.7rem;
-}
-
-.panda-btn span {
-  font-size: 1.12rem;
-  color: #006677;
-  font-weight: bold;
-}
-
-.panda-btn:hover {
-  transform: translateY(-5px) scale(1.05);
-  background: #e0f3f6;
-}
-
+.panda-btn img { max-width: 90px; height: auto; margin-bottom: 0.7rem; }
+.panda-btn span { font-size: 1.12rem; color: #006677; font-weight: bold; }
+.panda-btn:hover { transform: translateY(-5px) scale(1.05); background: #e0f3f6; }
 @media (max-width: 900px) {
   .panda-buttons { flex-direction: column; align-items: center; gap: 1.2rem; }
   .panda-btn { width: 90vw; max-width: 320px; }
 }
 
-/* --- Feedback-Button fixieren (unten rechts) --- */
+/* Feedback-Button fixieren */
 .feedback-button {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #ff9f1c;
-  color: #fff;
-  font-weight: bold;
-  padding: 0.8em 1em;
-  border-radius: 50px;
+  bottom: 20px; right: 20px;
+  background-color: #ff9f1c; color: #fff; font-weight: bold;
+  padding: 0.8em 1em; border-radius: 50px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  text-decoration: none;
-  font-size: 1rem;
-  z-index: 2000;
+  display: flex; align-items: center; gap: 0.5em;
+  text-decoration: none; font-size: 1rem; z-index: 2000;
   transition: transform 0.15s ease, background-color 0.15s ease;
 }
 .feedback-button img { width: 26px; height: 26px; }
 .feedback-button:hover { background-color: #e68a00; transform: scale(1.05); }
-@media (max-width:768px) {
-  .feedback-button { font-size: .9rem; padding: .7em .9em; gap: .4em; }
-}
+@media (max-width:768px) { .feedback-button { font-size: .9rem; padding: .7em .9em; gap: .4em; } }
 
-/* ===== Panel + Karten für die Essensphasen ===== */
-
-
+/* ===== Panel + Karten (Calculator) ===== */
 .phase-list {
   margin-top: 2rem;
-  padding: 1.5rem;
+  padding: 1.75rem 1.5rem;              /* mehr Luft */
   background-color: #f0f9fb;
   border-radius: 8px;
   border-left: 4px solid #0099a8;
 }
+#phase-list { display: grid; gap: 16px; } /* mehr Abstand zwischen Karten */
 
-/* Grid für Karten */
-#phase-list {
-  display: grid;
-  gap: 12px;
-}
-
-/* Karte: Panda links – Inhalt – (optional) Timer rechts */
+/* Karte: Panda links – Inhalt – Timer rechts */
 .phase-card {
   display: grid;
   grid-template-columns: 86px 1fr auto;
   align-items: center;
   gap: 12px;
-  padding: 0.9rem 1rem;
-  background: #fff;                        
+  padding: 1.1rem 1.2rem;               /* mehr Innenabstand */
+  background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  border-left: 4px solid #0099a8;             
+  border-left: 4px solid #0099a8;
 }
 .phase-card__media { display:flex; align-items:center; justify-content:center; }
 .phase-card__img   { width: 72px; height: 72px; object-fit: contain; }
 .phase-card__content { display: block; }
-.phase-card__title {
-  margin: 0 0 .2rem 0; color:#006677; font-size: 1.05rem; font-weight: bold;
-}
-.phase-card__meta {
-  display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .65rem;
-  color:#006677;
-}
+.phase-card__title { margin: 0 0 .2rem 0; color:#006677; font-size: 1.05rem; font-weight: bold; }
+.phase-card__meta { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .65rem; color:#006677; }
 
-/* Timer rechts als Badge */
+/* Timer: Icon + humanisierter Text */
 .timer {
   font-variant-numeric: tabular-nums;
   font-weight: bold;
   padding: .25rem .6rem;
   border-radius: 999px;
   background:#e0f3f6;
-  min-width: 88px;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
 }
-.timer-alt { font-size: .85rem; opacity: .8; }
-.until     { font-size: .92rem; opacity: .85; }
+.timer::before { content: "⏱️"; }
 
-/* Info-Button (kompatibel zu alter "info-button"-Klasse) */
-.info-btn,
-button.info-button {
-  background: none;
-  border: none;
-  color: #006677;
-  cursor: pointer;
-  padding: 0;
-  font-size: .95rem;
+/* Zusatzinfos */
+.until { font-size: .92rem; opacity: .85; }
+
+/* Info-Buttons */
+.info-btn, button.info-button {
+  background: none; border: none; color: #006677;
+  cursor: pointer; padding: 0; font-size: .95rem;
 }
-.info-btn:hover,
-button.info-button:hover { text-decoration: underline; }
+.info-btn:hover, button.info-button:hover { text-decoration: underline; }
 
-/* Zustände: erlaubt / bald Ende / abgelaufen – Farbakzent am Rand */
+/* Zustände: Farbakzent am Rand */
 .phase-card.state-allowed     { border-left-color:#0099a8; }
 .phase-card.state-ending-soon { border-left-color:#ff9f1c; }
 .phase-card.state-expired     { border-left-color:#C81E1E; opacity: .6; }
 
 /* Hinweistext (z. B. bei NPO-Karte ohne Timer) */
-.phase-card .phase-card__note {
-  margin: .2rem 0 0 0;
-  color:#006677; font-size: .95rem;
-}
+.phase-card .phase-card__note { margin: .2rem 0 0 0; color:#006677; font-size: .95rem; }
 
-/* ===== Modal (Klassen gemappt auf deine HTML-Struktur) ===== */
+/* ===== Modal ===== */
 .modal { position: fixed; inset: 0; display: none; z-index: 1000; }
 .modal.is-open { display: block; }
-.modal__backdrop {
-  position: absolute; inset: 0; background: rgba(0,0,0,0.5);
-}
+.modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
 .modal__dialog {
-  position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   background: #fff; padding: 2rem; border-radius: 8px;
   width: 80%; max-width: 600px; max-height: 80vh; overflow-y: auto;
   box-shadow: 0 0 12px rgba(0,0,0,0.2);
@@ -278,4 +206,3 @@ button.info-button:hover { text-decoration: underline; }
   .phase-card__img { width: 60px; height: 60px; }
   .phase-card__meta { margin-top: .35rem; }
 }
-

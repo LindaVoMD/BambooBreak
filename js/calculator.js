@@ -1,227 +1,319 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const form        = document.getElementById("fasting-form");
-  const opTimeInput = document.getElementById("op-time");
-  const submitBtn   = document.getElementById("submit-btn");
-  const resultDiv   = document.getElementById("result");
-  const resetBtn    = document.getElementById("reset-btn");
-  const modal       = document.getElementById("modal");
-  const modalTitle  = document.getElementById("modal-title");
-  const modalBody   = document.getElementById("modal-body");
-  const closeButton = document.querySelector(".close-button");
 
-  let firstRun = true;
-  let countdownInterval = null;
+(function () {
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const rulesUrl = "data/fastingrules.json";
-  const imgPath  = "assets/";
-  let rules = [];
-
-  // Regeln laden
-  try {
-    const res = await fetch(rulesUrl, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
-    rules = await res.json();
-  } catch {
-    resultDiv.innerHTML = "<strong>Fehler beim Laden der Regeln.</strong>";
-    resultDiv.classList.remove("hidden");
-    return;
-  }
-
-  // Modal-Funktion
-  function showModal(title, body) {
-    modalTitle.textContent = title;
-    modalBody.innerHTML    = body;
-    modal.classList.remove("hidden");
-  }
-  const hideModal = () => modal.classList.add("hidden");
-  closeButton.addEventListener("click", hideModal);
-  modal.addEventListener("click", (e) => { if (e.target === modal) hideModal(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideModal(); });
-
-  document.getElementById("age-hint").addEventListener("click", () => {
-    showModal("Warum das Alter wichtig ist",
-      "<p>Für Kinder unter 1 Jahr gelten angepasste Fastenregeln bezüglich säuglingsgerechter Nahrung.</p>"
-    );
-  });
-
-  // Hilfsfunktionen
-  function formatDateTime(d) {
-    return d.toLocaleDateString("de-DE") + " " +
-           String(d.getHours()).padStart(2,"0") + ":" +
-           String(d.getMinutes()).padStart(2,"0") + " Uhr";
-  }
-  function formatRemainingLong(sec) {
-    const h = Math.floor(sec/3600),
-          m = Math.floor((sec%3600)/60),
-          s = sec%60;
-    return `${String(h).padStart(2,"0")} Std ${String(m).padStart(2,"0")} Min ${String(s).padStart(2,"0")} Sek`;
-  }
-
-  // Folgefristen-Infobox
-  function getNextDeadlineHTML(ruleId, opTime) {
-    const toDateString = (date) =>
-      date.toLocaleDateString("de-DE") + ", " +
-      String(date.getHours()).padStart(2, "0") + ":" +
-      String(date.getMinutes()).padStart(2, "0") + " Uhr";
-
-    const timeBeforeOp = (min) => toDateString(new Date(opTime.getTime() - min * 60000));
-
-    let html = "<ul style='margin-top:0.7em'>";
-    switch (ruleId) {
-      case "normal_meal":
-        html += `<li>Eine kleine Mahlzeit ist bis <b>${timeBeforeOp(240)}</b> (4 Stunden vor OP) möglich.</li>
-                 <li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
-        break;
-      case "light_meal":
-        html += `<li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
-        break;
-      case "infant_solid_and_milk":
-        html += `<li>Kleine Portionen Beikost oder Fertig-/Kuhmilch sind bis <b>${timeBeforeOp(240)}</b> (4 Stunden vor OP) möglich.</li>
-                 <li>Muttermilch ist bis <b>${timeBeforeOp(180)}</b> (3 Stunden vor OP) möglich.</li>
-                 <li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
-        break;
-      case "infant_light_and_milk":
-        html += `<li>Muttermilch ist bis <b>${timeBeforeOp(180)}</b> (3 Stunden vor OP) möglich.</li>
-                 <li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
-        break;
-      case "infant_breastmilk":
-        html += `<li>Klare Flüssigkeit ist bis <b>${timeBeforeOp(60)}</b> (1 Stunde vor OP) möglich.</li>`;
-        break;
-      default:
-        html = "";
-    }
-    html += "</ul>";
-    return html !== "<ul style='margin-top:0.7em'></ul>" ? html : "";
-  }
-
-  // Hauptfunktion: Regel ermitteln & Ausgabe aktualisieren
-  function calculateAndDisplay(opTime, isInfant) {
-    const now     = new Date();
-    const diffMin = (opTime - now) / 60000;
-
-    // Vergangenheit?
-    if (diffMin < 0) {
-      if (countdownInterval) clearInterval(countdownInterval);
-      resultDiv.innerHTML = "<strong>Der eingegebene Zeitpunkt liegt in der Vergangenheit. Bitte Datum anpassen.</strong>";
-      resultDiv.classList.remove("hidden");
-      return;
-    }
-
-    // Regel auswählen
-    let rule;
-    if (diffMin > 1440) {
-      rule = rules.find(r => r.id === "free_eating");
-    } else {
-      const list = rules
-        .filter(r => isInfant ? r.infant_only : !r.infant_only)
-        .filter(r => diffMin >= r.min && diffMin < r.max);
-      rule = list.length ? list.reduce((a,b) => (b.min > a.min ? b : a)) : null;
-    }
-
-    // Keine passende Regel
-    if (!rule) {
-      if (countdownInterval) clearInterval(countdownInterval);
-      resultDiv.innerHTML = "<strong>Keine passende Regel gefunden.</strong>";
-      resultDiv.classList.remove("hidden");
-      return;
-    }
-
-    // Threshold-Berechnung
-    const thresholdTime = new Date(opTime.getTime() - rule.min * 60000);
-
-    // HTML zusammenbauen
-    let html = `<p><strong>${rule.phase}</strong></p>`;
-    if (rule.min > 0 && !["free_eating","fasting","infant_fasting"].includes(rule.id)) {
-      html += `<p><strong>Zuletzt bis:</strong> ${formatDateTime(thresholdTime)}</p>`;
-    }
-
-    html += `<div class="panda-container">`;
-    const imgs = Array.isArray(rule.panda) ? rule.panda : [rule.panda];
-    imgs.forEach(img => {
-      html += `<img src="${imgPath}${img}" class="panda" alt="Panda" onerror="this.style.display='none'">`;
-    });
-    html += `</div>`;
-
-    // Timer (sofern nötig)
-    const showTimer = !["free_eating","fasting","infant_fasting"].includes(rule.id);
-    if (showTimer) {
-      html += `<p id="countdown-timer" style="font-weight:bold;margin:1em 0 0.7em 0"></p>`;
-    }
-
-    // Info-Box zur Regel (note)
-    if (rule.note) {
-      html += `<details class="regel-infobox" style="margin-top:1em;">
-                 <summary>${rule.note.title}</summary>
-                 <p>${rule.note.text}</p>
-               </details>`;
-    }
-
-    // Folgefristen-Infobox
-    const idsForFristen = ["normal_meal","light_meal","infant_solid_and_milk","infant_light_and_milk","infant_breastmilk"];
-    if (idsForFristen.includes(rule.id)) {
-      const fristenHTML = getNextDeadlineHTML(rule.id, opTime);
-      if (fristenHTML) {
-        html += `<details class="regel-infobox" style="margin-top:1em;">
-                   <summary>Weitere Fristen im Überblick – Was gilt als nächstes?</b></summary>
-                   ${fristenHTML}
-                 </details>`;
+  // ---------- Fallback-Config (falls fetch fehlschlägt) -------------------
+  const DEFAULT_CONFIG = {
+    infoTexts: {
+      lightMeal: {
+        title: "Was ist eine leichte Mahlzeit?",
+        items: [
+          "z. B. Toast/Zwieback, klare Suppe ohne Einlage",
+          "keine fetten Speisen, kein Fleisch, kein rohes Gemüse"
+        ]
+      },
+      clearFluids: {
+        title: "Was ist eine klare Flüssigkeit?",
+        items: [
+          "Wasser, ungesüßter Tee",
+          "klarer Fruchtsaft ohne Fruchtfleisch",
+          "keine Milch, kein Orangensaft mit Fruchtfleisch"
+        ]
+      },
+      smallBeikost: {
+        title: "Was ist eine kleine Portion Beikost?",
+        items: [
+          "ca. 1/2 Standardportion Brei oder Fläschchen",
+          "ohne zusätzliche Fette/Öle"
+        ]
       }
-    }
-
-    // Ausgabe ins DOM
-    resultDiv.innerHTML = html;
-    resultDiv.classList.remove("hidden");
-
-    // Timer einbauen
-    if (showTimer) {
-      if (countdownInterval) clearInterval(countdownInterval);
-      const countdownEl = document.getElementById("countdown-timer");
-      function updateCountdown() {
-        const rem = Math.floor((thresholdTime - new Date()) / 1000);
-        if (rem > 0) {
-          countdownEl.textContent = `Diese Regel gilt noch: ⏰ ${formatRemainingLong(rem)}`;
-        } else {
-          countdownEl.textContent = "Diese Regel ist jetzt beendet. Bitte erneut berechnen.";
-          clearInterval(countdownInterval);
+    },
+    groups: {
+      gte1: {
+        cutoffs: { free: 8, normal: 6, light: 4, clear: 1 },
+        windows: [
+          { min: 8, max: null, phases: ["free", "normal", "light", "clear"] },
+          { min: 6, max: 8, phases: ["normal", "light", "clear"] },
+          { min: 4, max: 6, phases: ["light", "clear"] },
+          { min: 1, max: 4, phases: ["clear"] },
+          { min: 0, max: 1, phases: ["fasting"] }
+        ],
+        phaseDefs: {
+          free:   { title: "Freies Essen möglich",       imageSrc: "assets/panda_eats.png",   imageAlt: "Panda isst" },
+          normal: { title: "Normale Mahlzeit möglich",   imageSrc: "assets/panda_eats.png",   imageAlt: "Panda isst" },
+          light:  { title: "Leichte Mahlzeit möglich",   imageSrc: "assets/panda_apple.png",  imageAlt: "Panda mit Apfel", infoKey: "lightMeal" },
+          clear:  { title: "Klare Flüssigkeit möglich",  imageSrc: "assets/panda_drinks.png", imageAlt: "Panda trinkt",    infoKey: "clearFluids" },
+          fasting:{ title: "Bitte nüchtern bleiben",     imageSrc: "assets/panda_fasting.png",imageAlt: "Panda fastet",    noTimer: true }
+        }
+      },
+      lt1: {
+        cutoffs: { free: 8, beikost: 6, smallBeikost: 4, breastmilk: 3, clear: 1 },
+        windows: [
+          { min: 8, max: null, phases: ["free", "beikost", "smallBeikost", "breastmilk", "clear"] },
+          { min: 6, max: 8, phases: ["beikost", "smallBeikost", "breastmilk", "clear"] },
+          { min: 4, max: 6, phases: ["smallBeikost", "breastmilk", "clear"] },
+          { min: 3, max: 4, phases: ["breastmilk", "clear"] },
+          { min: 1, max: 3, phases: ["clear"] },
+          { min: 0, max: 1, phases: ["fasting"] }
+        ],
+        phaseDefs: {
+          free:         { title: "Freies Essen möglich",                   imageSrc: "assets/panda_eats.png",     imageAlt: "Panda isst" },
+          beikost:      { title: "Beikost & Milch möglich",                imageSrc: "assets/panda_porridge.png", imageAlt: "Panda mit Brei" },
+          smallBeikost: { title: "Kleine Portion Beikost & Milch möglich", imageSrc: "assets/panda_porridge.png", imageAlt: "Panda mit Brei", infoKey: "smallBeikost" },
+          breastmilk:   { title: "Muttermilch möglich",                    imageSrc: "assets/panda_nursed.png",   imageAlt: "Panda wird gestillt" },
+          clear:        { title: "Klare Flüssigkeit möglich",              imageSrc: "assets/panda_drinks.png",   imageAlt: "Panda trinkt", infoKey: "clearFluids" },
+          fasting:      { title: "Bitte nüchtern bleiben",                 imageSrc: "assets/panda_fasting.png",  imageAlt: "Panda fastet", noTimer: true }
         }
       }
-      updateCountdown();
-      countdownInterval = setInterval(updateCountdown, 1000);
-    } else if (countdownInterval) {
-      clearInterval(countdownInterval);
+    }
+  };
+
+  // ---------- Utils -------------------------------------------------------
+  const pad = (n) => n.toString().padStart(2, "0");
+  const toHM = (d) => d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+
+  function parseLocalDateTime(value) {
+    if (!value) return null;
+    const [date, time] = value.split("T");
+    if (!date || !time) return null;
+    const [y, m, d] = date.split("-").map(Number);
+    const [hh, mm] = time.split(":").map(Number);
+    return new Date(y, m - 1, d, hh, mm, 0, 0);
+  }
+  function hoursUntil(opDate) {
+    return (opDate.getTime() - Date.now()) / 36e5;
+  }
+  function deadlineFor(opDate, hoursBefore) {
+    return new Date(opDate.getTime() - hoursBefore * 3600 * 1000);
+  }
+  function fmtClock(msLeft) {
+    if (msLeft < 0) msLeft = 0;
+    const s = Math.floor(msLeft / 1000);
+    const hh = Math.floor(s / 3600);
+    const mm = Math.floor((s % 3600) / 60);
+    const ss = s % 60;
+    return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+  }
+
+  // ---------- DOM ---------------------------------------------------------
+  const opInput = $("#opDateTime");
+  const ageRadios = $$('input[name="ageGroup"]');
+  const calcBtn = $("#calcBtn");
+  const nowBtn = $("#nowBtn");
+  const validation = $("#validation");
+  const list = $("#phase-list");
+
+  // Modal
+  const modal = $("#info-modal");
+  const modalTitle = $("#modal-title");
+  const modalBody = $("#modal-body");
+  function showModalFromConfig(key) {
+    const info = CONFIG.infoTexts?.[key];
+    if (!info) return;
+    modalTitle.textContent = info.title || "Info";
+    const ul = document.createElement("ul");
+    ul.className = "bullet";
+    (info.items || []).forEach(t => {
+      const li = document.createElement("li");
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    modalBody.innerHTML = "";
+    modalBody.appendChild(ul);
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+  function hideModal() {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+  modal.addEventListener("click", (e) => {
+    if (e.target.classList.contains("modal__backdrop")) hideModal();
+  });
+  modal.querySelector(".modal__close").addEventListener("click", hideModal);
+  $$("[data-close]", modal).forEach(el => el.addEventListener("click", hideModal));
+
+  // ---------- Rendering ----------------------------------------------------
+  let TICK_HANDLE = null;
+  let CONFIG = null;
+
+  function normalizeMax(v) {
+    return (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
+  }
+
+  function createPhaseCard({ imageSrc, imageAlt, title, until, cutoffLabel, infoKey, noTimer }) {
+    const card = document.createElement("article");
+    card.className = "phase-card state-allowed";
+
+    const media = document.createElement("div");
+    media.className = "phase-card__media";
+
+    const img = document.createElement("img");
+    img.className = "phase-card__img";
+    img.src = imageSrc || "";
+    img.alt = imageAlt || "";
+    img.decoding = "async";
+    img.loading = "lazy";
+    media.appendChild(img);
+
+    const content = document.createElement("div");
+    content.className = "phase-card__content";
+
+    const h = document.createElement("h3");
+    h.className = "phase-card__title";
+    h.textContent = title;
+    content.appendChild(h);
+
+    if (!noTimer && until) {
+      const meta = document.createElement("div");
+      meta.className = "phase-card__meta";
+
+      const timer = document.createElement("div");
+      timer.className = "timer";
+      timer.dataset.deadline = until.getTime().toString();
+      timer.setAttribute("aria-live", "polite");
+
+      const when = document.createElement("div");
+      when.className = "until";
+      when.textContent = `bis ${toHM(until)} (${cutoffLabel})`;
+
+      meta.appendChild(timer);
+      meta.appendChild(when);
+
+      if (infoKey && CONFIG.infoTexts?.[infoKey]) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "info-btn";
+        btn.textContent = CONFIG.infoTexts[infoKey].title || "Info";
+        btn.addEventListener("click", () => showModalFromConfig(infoKey));
+        meta.appendChild(btn);
+      }
+
+      content.appendChild(meta);
+    } else {
+      const note = document.createElement("p");
+      note.className = "phase-card__note";
+      note.textContent = "Nur Wasser zum Spülen des Mundes, bitte nichts trinken/essen.";
+      content.appendChild(note);
+    }
+
+    card.appendChild(media);
+    card.appendChild(content);
+    return card;
+  }
+
+  function render() {
+    if (!CONFIG) return;
+    validation.textContent = "";
+    list.innerHTML = "";
+
+    const ageGroup = ageRadios.find(r => r.checked)?.value || "gte1";
+    const group = CONFIG.groups?.[ageGroup];
+    if (!group) { validation.textContent = "Konfiguration für die gewählte Altersgruppe fehlt."; return; }
+
+    const opDate = parseLocalDateTime(opInput.value);
+    if (!opDate) { validation.textContent = "Bitte OP-Termin wählen."; return; }
+
+    const deltaH = hoursUntil(opDate);
+    if (deltaH < 0) { validation.textContent = "Der OP-Termin liegt in der Vergangenheit."; return; }
+
+    const win = (group.windows || []).find(w => deltaH >= w.min && deltaH < normalizeMax(w.max));
+    if (!win) { validation.textContent = "Kein passendes Zeitfenster gefunden."; return; }
+
+    (win.phases || []).forEach(key => {
+      const def = group.phaseDefs?.[key];
+      if (!def) return;
+
+      let until = null, cutoffLabel = "";
+      if (!def.noTimer) {
+        const cutoffH = group.cutoffs?.[key];
+        if (typeof cutoffH === "number") {
+          until = deadlineFor(opDate, cutoffH);
+          cutoffLabel = `✕ ${cutoffH} h vor OP`;
+        }
+      }
+
+      const card = createPhaseCard({
+        imageSrc: def.imageSrc,
+        imageAlt: def.imageAlt,
+        title: def.title,
+        until,
+        cutoffLabel,
+        infoKey: def.infoKey,
+        noTimer: !!def.noTimer
+      });
+      list.appendChild(card);
+    });
+
+    startTicking();
+  }
+
+  function startTicking() { stopTicking(); tick(); TICK_HANDLE = setInterval(tick, 1000); }
+  function stopTicking() { if (TICK_HANDLE) clearInterval(TICK_HANDLE); TICK_HANDLE = null; }
+  function tick() {
+    const now = Date.now();
+    const timers = $$(".timer", list);
+    timers.forEach(el => {
+      const deadline = Number(el.dataset.deadline || "0");
+      const msLeft = deadline - now;
+      el.textContent = fmtClock(msLeft);
+
+      const card = el.closest(".phase-card");
+      card.classList.remove("state-ending-soon", "state-expired", "state-allowed");
+      if (msLeft <= 0) card.classList.add("state-expired");
+      else if (msLeft <= 30 * 60 * 1000) card.classList.add("state-ending-soon");
+      else card.classList.add("state-allowed");
+    });
+  }
+
+  // ---------- Bootstrapping ----------------------------------------------
+  async function loadConfig() {
+    try {
+      const res = await fetch("data/fastingrules.json", { cache: "no-cache" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (!json.groups || !json.infoTexts) throw new Error("Ungültiges JSON-Schema");
+      return json;
+    } catch (e) {
+      console.warn("[calculator] Fallback auf DEFAULT_CONFIG:", e?.message || e);
+      return DEFAULT_CONFIG;
     }
   }
 
-  // Submit-Handler mit Validierung
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const raw = opTimeInput.value;
-    if (!raw || raw.indexOf("T") === -1) {
-      if (countdownInterval) clearInterval(countdownInterval);
-      resultDiv.innerHTML = "<strong>Bitte Datum und Zeit vollständig eingeben.</strong>";
-      resultDiv.classList.remove("hidden");
-      return;
-    }
-
-    const opDate   = new Date(raw);
-    const isInfant = document.querySelector("input[name='infant']:checked").value === "yes";
-
-    calculateAndDisplay(opDate, isInfant);
-
-    if (firstRun) {
-      submitBtn.textContent = "Erneut berechnen";
-      firstRun = false;
-    }
+  // Events
+  const onAnyChange = () => render();
+  $$('input[name="ageGroup"]').forEach(r => r.addEventListener("change", onAnyChange));
+  $("#opDateTime").addEventListener("change", onAnyChange);
+  $("#calcBtn").addEventListener("click", (e) => { e.preventDefault(); render(); });
+  $("#nowBtn").addEventListener("click", () => {
+    const now = new Date();
+    const example = new Date(now.getTime() + 8 * 3600 * 1000);
+    const y = example.getFullYear();
+    const m = String(example.getMonth() + 1).padStart(2, "0");
+    const d = String(example.getDate()).padStart(2, "0");
+    const hh = String(example.getHours()).padStart(2, "0");
+    const mm = String(example.getMinutes()).padStart(2, "0");
+    $("#opDateTime").value = `${y}-${m}-${d}T${hh}:${mm}`;
+    render();
   });
+  window.addEventListener("beforeunload", stopTicking);
 
-  // Reset-Handler
-  resetBtn.addEventListener("click", () => {
-    opTimeInput.value = "";
-    submitBtn.textContent = "Berechnen";
-    firstRun = true;
-    resultDiv.innerHTML = "";
-    resultDiv.classList.add("hidden");
-    if (countdownInterval) clearInterval(countdownInterval);
-  });
-});
+  (async function init() {
+    // Prefill: nächste volle Stunde + 8h
+    const now = new Date();
+    const nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 0, 0);
+    const example = new Date(nextHour.getTime() + 8 * 3600 * 1000);
+    const y = example.getFullYear();
+    const m = String(example.getMonth() + 1).padStart(2, "0");
+    const d = String(example.getDate()).padStart(2, "0");
+    const hh = String(example.getHours()).padStart(2, "0");
+    const mm = String(example.getMinutes()).padStart(2, "0");
+    $("#opDateTime").value = `${y}-${m}-${d}T${hh}:${mm}`;
 
+    CONFIG = await loadConfig();
+    render();
+  })();
+})();

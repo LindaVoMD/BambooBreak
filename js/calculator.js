@@ -1,11 +1,19 @@
+/* calculator.js – OP-Termin / Essensphasen (modular, JSON-getrieben)
+   - Lädt Regeln aus data/fastingrules.json (kein Fallback)
+   - < 1 h vor OP: Phase "fasting" => Karte ohne Timer
+   - Timer-Icon + humanisierte Anzeige:
+       >24h  -> "dd Tage hh Stunden und mm Minuten"
+       sonst -> "hh Stunden und mm Minuten"
+*/
+
 (function () {
   // ---------- DOM Helpers ----------
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
   // ---------- DOM Elements ----------
-  const opInput     = $("#opDateTime");               // <input type="datetime-local">
-  const ageRadios   = $$('input[name="ageGroup"]');   // values: "gte1" | "lt1"
+  const opInput     = $("#opDateTime");
+  const ageRadios   = $$('input[name="ageGroup"]');
   const calcBtn     = $("#calcBtn");
   const resetBtn    = $("#resetBtn");
   const validation  = $("#validation");
@@ -17,13 +25,13 @@
   const modalBody   = $("#modal-body");
 
   // ---------- State ----------
-  let RULES = null;           // gefetchedes JSON
+  let RULES = null;
   let tickHandle = null;
 
   // ---------- Utils ----------
-  const pad = n => String(n).padStart(2, "0");
-  const toHM = d => d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-  const normalizeMax = v => (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
+  const pad = (n) => String(n).padStart(2, "0");
+  const toHM = (d) => d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  const normalizeMax = (v) => (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
 
   function parseLocalDateTime(value) {
     if (!value) return null;
@@ -33,24 +41,22 @@
     const [hh, mm]  = time.split(":").map(Number);
     return new Date(y, m - 1, d, hh, mm, 0, 0);
   }
-  const hoursUntil = (opDate) => (opDate.getTime() - Date.now()) / 36e5;
+  const hoursUntil  = (opDate) => (opDate.getTime() - Date.now()) / 36e5;
   const deadlineFor = (opDate, hoursBefore) => new Date(opDate.getTime() - hoursBefore * 3600 * 1000);
 
-  function fmtClock(msLeft) {
-    if (msLeft < 0) msLeft = 0;
-    const s  = Math.floor(msLeft / 1000);
-    const hh = Math.floor(s / 3600);
-    const mm = Math.floor((s % 3600) / 60);
-    const ss = s % 60;
-    return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
-  }
-  function fmtDHM(msLeft) {
+  // Humanisiertes Timerformat
+  function fmtHuman(msLeft) {
     if (msLeft < 0) msLeft = 0;
     const totalMin = Math.floor(msLeft / 60000);
     const days  = Math.floor(totalMin / (60 * 24));
     const hours = Math.floor((totalMin % (60 * 24)) / 60);
     const mins  = totalMin % 60;
-    return `${days} T ${hours} h ${mins} min`;
+    const dd = pad(days);
+    const hh = pad(hours);
+    const mm = pad(mins);
+    return days > 0
+      ? `${dd} Tage ${hh} Stunden und ${mm} Minuten`
+      : `${hh} Stunden und ${mm} Minuten`;
   }
 
   // ---------- Modal ----------
@@ -71,6 +77,13 @@
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
   }
+  function showModal(title, html) {
+    modalTitle.textContent = title || "Info";
+    modalBody.innerHTML = html || "";
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
   function closeModal() {
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
@@ -87,7 +100,6 @@
 
     const media = document.createElement("div");
     media.className = "phase-card__media";
-
     const img = document.createElement("img");
     img.className = "phase-card__img";
     img.src = imageSrc || "";
@@ -98,7 +110,6 @@
 
     const content = document.createElement("div");
     content.className = "phase-card__content";
-
     const h = document.createElement("h3");
     h.className = "phase-card__title";
     h.textContent = title;
@@ -112,35 +123,28 @@
       timer.className = "timer";
       timer.dataset.deadline = String(until.getTime());
       timer.setAttribute("aria-live", "polite");
-
-      const timerAlt = document.createElement("div");
-      timerAlt.className = "timer-alt hidden"; // >24h Anzeige
+      timer.innerHTML = `<span class="timer-text"></span>`;  // Icon via CSS ::before
 
       const when = document.createElement("div");
       when.className = "until";
-      when.textContent = `bis ${toHM(until)} (${cutoffLabel})`;
+      when.textContent = `bis ${toHM(until)} (✕ ${cutoffLabel})`;
 
-      meta.append(timer, when, timerAlt);
-
+      // Info-Button (optional je nach phaseDef)
       if (infoKey && RULES.infoTexts?.[infoKey]) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "info-btn";
         btn.textContent = RULES.infoTexts[infoKey].title || "Info";
         btn.addEventListener("click", () => openModalFromInfoKey(infoKey));
-        meta.appendChild(btn);
+        meta.append(timer, when, btn);
+      } else {
+        meta.append(timer, when);
       }
+
       content.appendChild(meta);
     } else {
-      // NPO: bewusst KEIN Timer
-      if (infoKey && RULES.infoTexts?.[infoKey]) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "info-btn";
-        btn.textContent = RULES.infoTexts[infoKey].title || "Info";
-        btn.addEventListener("click", () => openModalFromInfoKey(infoKey));
-        content.appendChild(btn);
-      }
+      // NPO-Karte ohne Timer
+      // (optional könnte hier ein kurzer Hinweistext stehen – die Grafik reicht meist)
     }
 
     card.append(media, content);
@@ -179,7 +183,7 @@
         const cutoffH = group.cutoffs?.[code];
         if (typeof cutoffH === "number") {
           until = deadlineFor(opDate, cutoffH);
-          cutoffLabel = `✕ ${cutoffH} h vor OP`;
+          cutoffLabel = `${cutoffH} h vor OP`;
         }
       }
 
@@ -204,24 +208,16 @@
     $$(".timer", list).forEach(el => {
       const deadline = Number(el.dataset.deadline || "0");
       const msLeft = deadline - now;
-      el.textContent = fmtClock(msLeft);
+
+      const span = el.querySelector(".timer-text");
+      if (span) span.textContent = fmtHuman(msLeft);
+      else      el.textContent   = fmtHuman(msLeft); // Fallback
 
       const card = el.closest(".phase-card");
-      const alt  = card.querySelector(".timer-alt");
-
       card.classList.remove("state-ending-soon", "state-expired", "state-allowed");
       if (msLeft <= 0) card.classList.add("state-expired");
       else if (msLeft <= 30 * 60 * 1000) card.classList.add("state-ending-soon");
       else card.classList.add("state-allowed");
-
-      if (alt) {
-        if (msLeft >= 24 * 3600 * 1000) {
-          alt.textContent = fmtDHM(msLeft);
-          alt.classList.remove("hidden");
-        } else {
-          alt.classList.add("hidden");
-        }
-      }
     });
   }
   function startTicking(){ stopTicking(); tick(); tickHandle = setInterval(tick, 1000); }
@@ -241,15 +237,27 @@
   });
   window.addEventListener("beforeunload", stopTicking);
 
-  // ---------- Init ----------
+  // Alters-Info öffnen
+  const ageHintBtn = document.getElementById("age-hint");
+  if (ageHintBtn) {
+    ageHintBtn.addEventListener("click", () => {
+      showModal(
+        "Warum das Alter wichtig ist",
+        "<p>Für Kinder <strong>unter 1 Jahr</strong> gelten angepasste Fastenregeln für säuglingsgerechte Nahrung. " +
+        "Darum unterscheiden wir zwischen ≥ 1 Jahr und &lt; 1 Jahr.</p>"
+      );
+    });
+  }
+
+  // ---------- Init (Regeln laden) ----------
   document.addEventListener("DOMContentLoaded", async () => {
     const rulesUrl = "data/fastingrules.json";
     try {
       const res = await fetch(rulesUrl, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      RULES = await res.json();
+      const txt = await res.text();
+      RULES = JSON.parse(txt.replace(/^\uFEFF/, "")); // BOM-sicher
 
-      // sehr leichte Validierung auf erwartete Keys
       if (!RULES.groups || !RULES.infoTexts) throw new Error("Ungültiges Regelwerk");
       validation.textContent = "";
     } catch (err) {

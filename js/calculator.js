@@ -1,76 +1,6 @@
-/* OP-Termin – Essensphasen (JSON-getrieben mit Panda-PNGs)
-   Änderungen:
-   - Kein Auto-Prefill/Render beim Laden
-   - "Beispiel setzen" entfernt
-   - Reset-Button
-   - Zusatzanzeige >24h: "X T Y h Z min"
-*/
 (function () {
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  // ---------- Fallback-Config (falls fetch fehlschlägt) -------------------
-  const DEFAULT_CONFIG = {
-    infoTexts: {
-      lightMeal: {
-        title: "Was ist eine leichte Mahlzeit?",
-        items: [
-          "z. B. 1 Toast mit Marmelade, 1 Zwieback oder 1 Becher Milch/ Kakao"
-        ]
-      },
-      clearFluids: {
-        title: "Was ist eine klare Flüssigkeit?",
-        items: [
-          "Wasser, ungesüßter Tee",
-          "klarer Fruchtsaft ohne Fruchtfleisch"
-        ]
-      },
-      smallBeikost: {
-        title: "Was ist eine kleine Portion Beikost?",
-        items: [
-          "ca. 1/2 Standardportion Brei oder Fläschchen"
-        ]
-      }
-    },
-    groups: {
-      gte1: {
-        cutoffs: { free: 8, normal: 6, light: 4, clear: 1 },
-        windows: [
-          { min: 8, max: null, phases: ["free", "normal", "light", "clear"] },
-          { min: 6, max: 8, phases: ["normal", "light", "clear"] },
-          { min: 4, max: 6, phases: ["light", "clear"] },
-          { min: 1, max: 4, phases: ["clear"] },
-          { min: 0, max: 1, phases: ["fasting"] }
-        ],
-        phaseDefs: {
-          free:   { title: "Freies Essen möglich",       imageSrc: "assets/panda_eats.png",   imageAlt: "Panda isst" },
-          normal: { title: "Normale Mahlzeit möglich",   imageSrc: "assets/panda_eats.png",   imageAlt: "Panda isst" },
-          light:  { title: "Leichte Mahlzeit möglich",   imageSrc: "assets/panda_apple.png",  imageAlt: "Panda mit Apfel", infoKey: "lightMeal" },
-          clear:  { title: "Klare Flüssigkeit möglich",  imageSrc: "assets/panda_drinks.png", imageAlt: "Panda trinkt",    infoKey: "clearFluids" },
-          fasting:{ title: "Bitte nüchtern bleiben",     imageSrc: "assets/panda_fasting.png",imageAlt: "Panda fastet",    noTimer: true }
-        }
-      },
-      lt1: {
-        cutoffs: { free: 8, beikost: 6, smallBeikost: 4, breastmilk: 3, clear: 1 },
-        windows: [
-          { min: 8, max: null, phases: ["free", "beikost", "smallBeikost", "breastmilk", "clear"] },
-          { min: 6, max: 8, phases: ["beikost", "smallBeikost", "breastmilk", "clear"] },
-          { min: 4, max: 6, phases: ["smallBeikost", "breastmilk", "clear"] },
-          { min: 3, max: 4, phases: ["breastmilk", "clear"] },
-          { min: 1, max: 3, phases: ["clear"] },
-          { min: 0, max: 1, phases: ["fasting"] }
-        ],
-        phaseDefs: {
-          free:         { title: "Freies Essen möglich",                   imageSrc: "assets/panda_eats.png",     imageAlt: "Panda isst" },
-          beikost:      { title: "Beikost & Milch möglich",                imageSrc: "assets/panda_porridge.png", imageAlt: "Panda mit Brei" },
-          smallBeikost: { title: "Kleine Portion Beikost & Milch möglich", imageSrc: "assets/panda_porridge.png", imageAlt: "Panda mit Brei", infoKey: "smallBeikost" },
-          breastmilk:   { title: "Muttermilch möglich",                    imageSrc: "assets/panda_nursed.png",   imageAlt: "Panda wird gestillt" },
-          clear:        { title: "Klare Flüssigkeit möglich",              imageSrc: "assets/panda_drinks.png",   imageAlt: "Panda trinkt", infoKey: "clearFluids" },
-          fasting:      { title: "Bitte nüchtern bleiben",                 imageSrc: "assets/panda_fasting.png",  imageAlt: "Panda fastet", noTimer: true }
-        }
-      }
-    }
-  };
 
   // ---------- Utils -------------------------------------------------------
   const pad = (n) => n.toString().padStart(2, "0");
@@ -106,6 +36,7 @@
     const mins = totalMin % 60;
     return `${days} T ${hours} h ${mins} min`;
   }
+  const normalizeMax = (v) => (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
 
   // ---------- DOM ---------------------------------------------------------
   const opInput = $("#opDateTime");
@@ -120,7 +51,7 @@
   const modalTitle = $("#modal-title");
   const modalBody = $("#modal-body");
   function showModalFromConfig(key) {
-    const info = CONFIG.infoTexts?.[key];
+    const info = CONFIG?.infoTexts?.[key];
     if (!info) return;
     modalTitle.textContent = info.title || "Info";
     const ul = document.createElement("ul");
@@ -147,14 +78,11 @@
   modal.querySelector(".modal__close").addEventListener("click", hideModal);
   $$("[data-close]", modal).forEach(el => el.addEventListener("click", hideModal));
 
-  // ---------- Rendering ----------------------------------------------------
-  let TICK_HANDLE = null;
+  // ---------- State -------------------------------------------------------
   let CONFIG = null;
+  let TICK_HANDLE = null;
 
-  function normalizeMax(v) {
-    return (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
-  }
-
+  // ---------- Rendering ---------------------------------------------------
   function createPhaseCard({ imageSrc, imageAlt, title, until, cutoffLabel, infoKey, noTimer }) {
     const card = document.createElement("article");
     card.className = "phase-card state-allowed";
@@ -296,21 +224,28 @@
     });
   }
 
-  // ---------- Bootstrapping ----------------------------------------------
-  async function loadConfig() {
+  // ---------- Daten laden (ohne Fallback) ---------------------------------
+  async function loadConfigStrict() {
+    const url = "data/fastingrules.json";
     try {
-      const res = await fetch("data/fastingrules.json", { cache: "no-cache" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetch(url, { cache: "no-cache" });
+      if (!res.ok) throw new Error(`HTTP ${res.status} beim Laden von ${url}`);
       const json = await res.json();
+      // Minimalvalidierung
       if (!json.groups || !json.infoTexts) throw new Error("Ungültiges JSON-Schema");
       return json;
     } catch (e) {
-      console.warn("[calculator] Fallback auf DEFAULT_CONFIG:", e?.message || e);
-      return DEFAULT_CONFIG;
+      // Sichtbarer Fehler für Nutzer:innen
+      validation.textContent = "Regelwerk konnte nicht geladen werde";
+      // Steuerung deaktivieren, um Missverständnisse zu vermeiden
+      calcBtn.disabled = true;
+      opInput.disabled = true;
+      ageRadios.forEach(r => r.disabled = true);
+      return null;
     }
   }
 
-  // Events
+  // ---------- Events ------------------------------------------------------
   const onAnyChange = () => render();
   $$('input[name="ageGroup"]').forEach(r => r.addEventListener("change", onAnyChange));
   $("#opDateTime").addEventListener("change", onAnyChange);
@@ -324,8 +259,9 @@
   });
   window.addEventListener("beforeunload", stopTicking);
 
+  // ---------- Init --------------------------------------------------------
   (async function init() {
-    CONFIG = await loadConfig();
-    // Kein Auto-Render / kein Prefill: Seite bleibt leer bis zur ersten Eingabe
+    CONFIG = await loadConfigStrict();
+    // Kein Auto-Render / kein Prefill
   })();
 })();

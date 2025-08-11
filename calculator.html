@@ -1,49 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>BambooBreak - Perioperativer Fastentimer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OP-Termin – Essensphasen</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <main>
-    <h1>Fastentimer</h1>
-    <p>Geben Sie den geplanten Eingriffs-Termin und das Alter Ihres Kindes an, um die passenden Regeln zu berechnen.</p>
+  <main class="container">
+    <header class="page-header">
+      <h1>OP-Termin • Essensphasen</h1>
+      <p class="subtitle">Pandagrafik links, Timer/Endzeit rechts – alle Phasen im Überblick.</p>
+    </header>
 
-    <form id="fasting-form">
-      <label for="op-time">OP-Termin:</label>
-      <input type="datetime-local" id="op-time" required>
+    <section class="controls" aria-labelledby="controls-title">
+      <h2 id="controls-title" class="sr-only">Eingaben</h2>
 
-      <fieldset>
-        <legend>Ist das Kind unter 1 Jahr alt?</legend>
-        <label>
-          <input type="radio" name="infant" value="yes"> Ja
-        </label>
-        <label>
-          <input type="radio" name="infant" value="no" checked> Nein
-        </label>
-        <button type="button" id="age-hint" class="info-button" aria-label="Warum das Alter wichtig ist">?</button>
-      </fieldset>
-
-      <div class="buttons">
-        <button type="submit" id="submit-btn">Berechnen</button>
-        <button type="button" id="reset-btn">Zurücksetzen</button>
+      <div class="field">
+        <label class="label">Alter des Kindes</label>
+        <div class="segmented" role="radiogroup" aria-label="Altersgruppe">
+          <label class="segmented__item">
+            <input type="radio" name="ageGroup" value="gte1" checked />
+            <span>≥ 1 Jahr</span>
+          </label>
+          <label class="segmented__item">
+            <input type="radio" name="ageGroup" value="lt1" />
+            <span>&lt; 1 Jahr</span>
+          </label>
+        </div>
       </div>
-    </form>
 
-    <div id="result" class="hidden"></div>
+      <div class="field">
+        <label for="opDateTime" class="label">OP-Termin</label>
+        <input id="opDateTime" type="datetime-local" required aria-describedby="opHelp" />
+        <small id="opHelp" class="subtitle">Bitte Datum & Uhrzeit des geplanten Eingriffs wählen.</small>
+      </div>
 
-    <button onclick="location.href='index.html'" class="icon-button">Zurück zur Startseite</button>
+      <div class="actions">
+        <button id="calcBtn" class="btn btn-primary" type="button">Aktualisieren</button>
+        <button id="nowBtn" class="btn btn-ghost" type="button" title="OP +8 h als Beispiel eintragen">Beispiel setzen</button>
+      </div>
+
+      <p id="validation" class="validation" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="phase-list" class="phase-list" aria-labelledby="phase-list-title">
+      <h2 id="phase-list-title" class="sr-only">Essensphasen</h2>
+      <!-- Karten werden per JS aus data/fastingrules.json gerendert -->
+    </section>
   </main>
-  <script src="js/calculator.js"></script>
-  <!-- Modal für Hinweise -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-content">
-      <span class="close-button">&times;</span>
-      <h2 id="modal-title"></h2>
-      <div id="modal-body"></div>
+
+  <!-- Info-Modal -->
+  <div id="info-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__dialog">
+      <button class="modal__close" type="button" aria-label="Schließen">×</button>
+      <h3 id="modal-title" class="modal__title">Info</h3>
+      <div id="modal-body" class="modal__body"></div>
     </div>
   </div>
+
+  <script src="js/calculator.js"></script>
 </body>
 </html>

@@ -265,7 +265,46 @@ details.regel-infobox[open] {
   margin:1em 0;
   font-weight:bold;
 }
+
+.feedback-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ff9f1c;
+  color: white;
+  font-weight: bold;
+  padding: 0.8em 1em 0.8em 1em;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  text-decoration: none;
+  font-size: 1rem;
+  z-index: 2000;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
+
+.feedback-button img {
+  width: 26px;
+  height: 26px;
+}
+
+.feedback-button:hover {
+  background-color: #e68a00;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .feedback-button {
+    font-size: 0.9rem;
+    padding: 0.7em 0.9em;
+    gap: 0.4em;
+  }
+}
+
+}
+
 
 
 

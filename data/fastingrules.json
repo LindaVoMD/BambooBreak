@@ -5,23 +5,20 @@
     "lightMeal": {
       "title": "Was ist eine leichte Mahlzeit?",
       "items": [
-        "z. B. Toast/Zwieback, klare Suppe ohne Einlage",
-        "keine fetten Speisen, kein Fleisch, kein rohes Gemüse"
+        "z. B. 1 Toast mit Marmelade, 1 Apfel, 1 Banane, 1 Becher Joghurt oder ein Becher Milch/ Kakao",
       ]
     },
     "clearFluids": {
       "title": "Was ist eine klare Flüssigkeit?",
       "items": [
-        "Wasser, ungesüßter Tee",
-        "klarer Fruchtsaft ohne Fruchtfleisch",
-        "keine Milch, kein Orangensaft mit Fruchtfleisch"
+        "Wasser, (gesüßter) Tee",
+        "klarer Fruchtsaft ohne Fruchtfleisch"
       ]
     },
     "smallBeikost": {
       "title": "Was ist eine kleine Portion Beikost?",
       "items": [
-        "ca. 1/2 Standardportion Brei oder Fläschchen",
-        "ohne zusätzliche Fette/Öle"
+        "ca. 1/2 Standardportion Brei"
       ]
     }
   },
@@ -36,7 +33,7 @@
         { "min": 0, "max": 1, "phases": ["fasting"] }
       ],
       "phaseDefs": {
-        "free":   { "title": "Freies Essen möglich",       "imageSrc": "assets/panda_eats.png",    "imageAlt": "Panda isst" },
+        "free":   { "title": "Freies Essen möglich",       "imageSrc": "assets/panda_eats2.png",    "imageAlt": "Panda isst" },
         "normal": { "title": "Normale Mahlzeit möglich",   "imageSrc": "assets/panda_eats.png",    "imageAlt": "Panda isst" },
         "light":  { "title": "Leichte Mahlzeit möglich",   "imageSrc": "assets/panda_apple.png",   "imageAlt": "Panda mit Apfel", "infoKey": "lightMeal" },
         "clear":  { "title": "Klare Flüssigkeit möglich",  "imageSrc": "assets/panda_drinks.png",  "imageAlt": "Panda trinkt",     "infoKey": "clearFluids" },
@@ -54,7 +51,7 @@
         { "min": 0, "max": 1, "phases": ["fasting"] }
       ],
       "phaseDefs": {
-        "free":         { "title": "Freies Essen möglich",                         "imageSrc": "assets/panda_eats.png",      "imageAlt": "Panda isst" },
+        "free":         { "title": "Freies Essen möglich",                         "imageSrc": "assets/panda_eats2.png",      "imageAlt": "Panda isst" },
         "beikost":      { "title": "Beikost & Milch möglich",                      "imageSrc": "assets/panda_porridge.png",  "imageAlt": "Panda mit Brei" },
         "smallBeikost": { "title": "Kleine Portion Beikost & Milch möglich",       "imageSrc": "assets/panda_porridge.png",  "imageAlt": "Panda mit Brei", "infoKey": "smallBeikost" },
         "breastmilk":   { "title": "Muttermilch möglich",                           "imageSrc": "assets/panda_nursed.png",    "imageAlt": "Panda wird gestillt" },
@@ -64,3 +61,4 @@
     }
   }
 }
+

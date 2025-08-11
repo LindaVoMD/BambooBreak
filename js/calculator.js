@@ -1,9 +1,8 @@
 /* calculator.js – OP-Termin / Essensphasen (modular, JSON-getrieben)
-   - Lädt Regeln aus data/fastingrules.json (kein Fallback)
-   - < 1 h vor OP: Phase "fasting" => Karte ohne Timer
-   - Timer-Icon + humanisierte Anzeige:
-       >24h  -> "dd Tage hh Stunden und mm Minuten"
-       sonst -> "hh Stunden und mm Minuten"
+   - Lädt Regeln aus data/fastingrules.json
+   - Timer als "⏱️ dd Tage hh Stunden mm Minuten" bzw. "<24h: hh Stunden mm Minuten"
+   - Unter dem Timer eine Detailzeile: "bis HH:MM Uhr am DD.MM.YY (bis X Stunde(n) vor OP)"
+   - Info-Buttons als sichtbare "Chips" mit ?-Icon
 */
 
 (function () {
@@ -44,7 +43,7 @@
   const hoursUntil  = (opDate) => (opDate.getTime() - Date.now()) / 36e5;
   const deadlineFor = (opDate, hoursBefore) => new Date(opDate.getTime() - hoursBefore * 3600 * 1000);
 
-  // Humanisiertes Timerformat
+  // Humanisiertes Timerformat (kein "und")
   function fmtHuman(msLeft) {
     if (msLeft < 0) msLeft = 0;
     const totalMin = Math.floor(msLeft / 60000);
@@ -55,9 +54,16 @@
     const hh = pad(hours);
     const mm = pad(mins);
     return days > 0
-      ? `${dd} Tage ${hh} Stunden und ${mm} Minuten`
-      : `${hh} Stunden und ${mm} Minuten`;
+      ? `${dd} Tage ${hh} Stunden ${mm} Minuten`
+      : `${hh} Stunden ${mm} Minuten`;
   }
+  function fmtDateDEshort(d) {
+    const dd = pad(d.getDate());
+    const mm = pad(d.getMonth()+1);
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${dd}.${mm}.${yy}`;
+  }
+  function plural(n, s, p) { return n === 1 ? s : p; }
 
   // ---------- Modal ----------
   function openModalFromInfoKey(key) {
@@ -94,10 +100,11 @@
   $$("[data-close]", modal).forEach(el => el.addEventListener("click", closeModal));
 
   // ---------- Rendering ----------
-  function createPhaseCard({ imageSrc, imageAlt, title, until, cutoffLabel, infoKey, noTimer }) {
+  function createPhaseCard({ imageSrc, imageAlt, title, until, cutoffH, infoKey, noTimer }) {
     const card = document.createElement("article");
     card.className = "phase-card state-allowed";
 
+    // Panda
     const media = document.createElement("div");
     media.className = "phase-card__media";
     const img = document.createElement("img");
@@ -108,6 +115,7 @@
     img.decoding = "async";
     media.appendChild(img);
 
+    // Content
     const content = document.createElement("div");
     content.className = "phase-card__content";
     const h = document.createElement("h3");
@@ -115,37 +123,40 @@
     h.textContent = title;
     content.appendChild(h);
 
+    // Meta (Timer + Detail)
     if (!noTimer && until) {
       const meta = document.createElement("div");
       meta.className = "phase-card__meta";
 
+      // Timer-Badge
       const timer = document.createElement("div");
       timer.className = "timer";
       timer.dataset.deadline = String(until.getTime());
       timer.setAttribute("aria-live", "polite");
-      timer.innerHTML = `<span class="timer-text"></span>`;  // Icon via CSS ::before
+      timer.innerHTML = `<span class="timer-text"></span>`;  // gefüllt im Ticker
 
-      const when = document.createElement("div");
-      when.className = "until";
-      when.textContent = `bis ${toHM(until)} (✕ ${cutoffLabel})`;
+      // Detailzeile
+      const detail = document.createElement("div");
+      detail.className = "timer-detail";
+      const cutoffText = `${cutoffH} ${plural(cutoffH, "Stunde", "Stunden")}`;
+      detail.textContent = `bis ${toHM(until)} Uhr am ${fmtDateDEshort(until)} (bis ${cutoffText} vor OP)`;
 
-      // Info-Button (optional je nach phaseDef)
-      if (infoKey && RULES.infoTexts?.[infoKey]) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "info-btn";
-        btn.textContent = RULES.infoTexts[infoKey].title || "Info";
-        btn.addEventListener("click", () => openModalFromInfoKey(infoKey));
-        meta.append(timer, when, btn);
-      } else {
-        meta.append(timer, when);
-      }
-
+      meta.append(timer, detail);
       content.appendChild(meta);
-    } else {
-      // NPO-Karte ohne Timer
-      // (optional könnte hier ein kurzer Hinweistext stehen – die Grafik reicht meist)
     }
+
+    // Info-Chips
+    const chips = document.createElement("div");
+    chips.className = "info-chips";
+    if (infoKey && RULES.infoTexts?.[infoKey]) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "info-chip";
+      chip.textContent = RULES.infoTexts[infoKey].title || "Info";
+      chip.addEventListener("click", () => openModalFromInfoKey(infoKey));
+      chips.appendChild(chip);
+    }
+    if (chips.childElementCount) content.appendChild(chips);
 
     card.append(media, content);
     return card;
@@ -178,13 +189,10 @@
       const def = group.phaseDefs?.[code];
       if (!def) return;
 
-      let until = null, cutoffLabel = "";
+      let until = null, cutoffH = null;
       if (!def.noTimer) {
-        const cutoffH = group.cutoffs?.[code];
-        if (typeof cutoffH === "number") {
-          until = deadlineFor(opDate, cutoffH);
-          cutoffLabel = `${cutoffH} h vor OP`;
-        }
+        cutoffH = group.cutoffs?.[code];
+        if (typeof cutoffH === "number") until = deadlineFor(opDate, cutoffH);
       }
 
       const card = createPhaseCard({
@@ -192,7 +200,7 @@
         imageAlt: def.imageAlt,
         title:    def.title,
         until,
-        cutoffLabel,
+        cutoffH,
         infoKey:  def.infoKey,
         noTimer:  !!def.noTimer
       });
@@ -211,7 +219,7 @@
 
       const span = el.querySelector(".timer-text");
       if (span) span.textContent = fmtHuman(msLeft);
-      else      el.textContent   = fmtHuman(msLeft); // Fallback
+      else      el.textContent   = fmtHuman(msLeft);
 
       const card = el.closest(".phase-card");
       card.classList.remove("state-ending-soon", "state-expired", "state-allowed");
@@ -237,7 +245,7 @@
   });
   window.addEventListener("beforeunload", stopTicking);
 
-  // Alters-Info öffnen
+  // Alters-Info (Fragezeichen)
   const ageHintBtn = document.getElementById("age-hint");
   if (ageHintBtn) {
     ageHintBtn.addEventListener("click", () => {

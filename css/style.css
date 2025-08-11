@@ -96,6 +96,79 @@ input[type="datetime-local"] {
   font-weight: 600;
 }
 
+.panda {           /* Einzelbild (z. B. Info-Seite) */
+  max-width: 120px;
+  height: auto;
+}
+
+.panda-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2.5rem 0;
+}
+
+.panda-btn {
+  background: #f0f9fb;
+  border: 2px solid #0099a8;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.2rem 1rem;
+  cursor: pointer;
+  width: 170px;
+  transition: transform 0.1s;
+}
+
+.panda-btn img {   /* WICHTIG: Bildgröße begrenzen */
+  max-width: 90px;
+  height: auto;
+  margin-bottom: 0.7rem;
+}
+
+.panda-btn span {
+  font-size: 1.12rem;
+  color: #006677;
+  font-weight: bold;
+}
+
+.panda-btn:hover {
+  transform: translateY(-5px) scale(1.05);
+  background: #e0f3f6;
+}
+
+@media (max-width: 900px) {
+  .panda-buttons { flex-direction: column; align-items: center; gap: 1.2rem; }
+  .panda-btn { width: 90vw; max-width: 320px; }
+}
+
+/* --- Feedback-Button fixieren (unten rechts) --- */
+.feedback-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ff9f1c;
+  color: #fff;
+  font-weight: bold;
+  padding: 0.8em 1em;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  text-decoration: none;
+  font-size: 1rem;
+  z-index: 2000;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.feedback-button img { width: 26px; height: 26px; }
+.feedback-button:hover { background-color: #e68a00; transform: scale(1.05); }
+@media (max-width:768px) {
+  .feedback-button { font-size: .9rem; padding: .7em .9em; gap: .4em; }
+}
+
 /* ===== Panel + Karten für die Essensphasen ===== */
 
 
@@ -205,3 +278,4 @@ button.info-button:hover { text-decoration: underline; }
   .phase-card__img { width: 60px; height: 60px; }
   .phase-card__meta { margin-top: .35rem; }
 }
+

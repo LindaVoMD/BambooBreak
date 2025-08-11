@@ -5,7 +5,7 @@
     "lightMeal": {
       "title": "Was ist eine leichte Mahlzeit?",
       "items": [
-        "z. B. 1 Toast mit Marmelade, 1 Apfel, 1 Banane, 1 Becher Joghurt oder ein Becher Milch/ Kakao",
+        "z. B. 1 Toast mit Marmelade, 1 Apfel, 1 Banane, 1 Becher Joghurt oder ein Becher Milch/ Kakao"
       ]
     },
     "clearFluids": {
@@ -33,7 +33,7 @@
         { "min": 0, "max": 1, "phases": ["fasting"] }
       ],
       "phaseDefs": {
-        "free":   { "title": "Freies Essen möglich",       "imageSrc": "assets/panda_eats2.png",    "imageAlt": "Panda isst" },
+        "free":   { "title": "Freies Essen möglich",       "imageSrc": "assets/panda_eats2.png",   "imageAlt": "Panda isst" },
         "normal": { "title": "Normale Mahlzeit möglich",   "imageSrc": "assets/panda_eats.png",    "imageAlt": "Panda isst" },
         "light":  { "title": "Leichte Mahlzeit möglich",   "imageSrc": "assets/panda_apple.png",   "imageAlt": "Panda mit Apfel", "infoKey": "lightMeal" },
         "clear":  { "title": "Klare Flüssigkeit möglich",  "imageSrc": "assets/panda_drinks.png",  "imageAlt": "Panda trinkt",     "infoKey": "clearFluids" },
@@ -51,14 +51,13 @@
         { "min": 0, "max": 1, "phases": ["fasting"] }
       ],
       "phaseDefs": {
-        "free":         { "title": "Freies Essen möglich",                         "imageSrc": "assets/panda_eats2.png",      "imageAlt": "Panda isst" },
-        "beikost":      { "title": "Beikost & Milch möglich",                      "imageSrc": "assets/panda_porridge.png",  "imageAlt": "Panda mit Brei" },
-        "smallBeikost": { "title": "Kleine Portion Beikost & Milch möglich",       "imageSrc": "assets/panda_porridge.png",  "imageAlt": "Panda mit Brei", "infoKey": "smallBeikost" },
-        "breastmilk":   { "title": "Muttermilch möglich",                           "imageSrc": "assets/panda_nursed.png",    "imageAlt": "Panda wird gestillt" },
-        "clear":        { "title": "Klare Flüssigkeit möglich",                     "imageSrc": "assets/panda_drinks.png",    "imageAlt": "Panda trinkt", "infoKey": "clearFluids" },
-        "fasting":      { "title": "Bitte nüchtern bleiben",                        "imageSrc": "assets/panda_fasting.png",   "imageAlt": "Panda fastet", "noTimer": true }
+        "free":         { "title": "Freies Essen möglich",                   "imageSrc": "assets/panda_eats2.png",     "imageAlt": "Panda isst" },
+        "beikost":      { "title": "Beikost & Milch möglich",                "imageSrc": "assets/panda_porridge.png",  "imageAlt": "Panda mit Brei" },
+        "smallBeikost": { "title": "Kleine Portion Beikost & Milch möglich", "imageSrc": "assets/panda_porridge.png",  "imageAlt": "Panda mit Brei", "infoKey": "smallBeikost" },
+        "breastmilk":   { "title": "Muttermilch möglich",                    "imageSrc": "assets/panda_nursed.png",    "imageAlt": "Panda wird gestillt" },
+        "clear":        { "title": "Klare Flüssigkeit möglich",              "imageSrc": "assets/panda_drinks.png",    "imageAlt": "Panda trinkt", "infoKey": "clearFluids" },
+        "fasting":      { "title": "Bitte nüchtern bleiben",                 "imageSrc": "assets/panda_fasting.png",   "imageAlt": "Panda fastet", "noTimer": true }
       }
     }
   }
 }
-

@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>OP-Termin – Essensphasen</title>
+  <title>OP-Termin eingeben</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <main class="container">
     <header class="page-header">
       <h1>OP-Termin • Essensphasen</h1>
-      <p class="subtitle">Pandagrafik links, Timer/Endzeit rechts – alle Phasen im Überblick.</p>
+      <p class="subtitle">Nach Eingabe des Termins zur OP/ Narkose werden die relevanten Fastenrichtlinien mit Timer ausgegeben.</p>
     </header>
 
     <section class="controls" aria-labelledby="controls-title">
@@ -38,7 +38,8 @@
 
       <div class="actions">
         <button id="calcBtn" class="btn btn-primary" type="button">Aktualisieren</button>
-        <button id="nowBtn" class="btn btn-ghost" type="button" title="OP +8 h als Beispiel eintragen">Beispiel setzen</button>
+        <button id="resetBtn" class="btn" type="button">Zurücksetzen</button>
+        <a href="index.html" class="btn btn-ghost" role="button">← Zurück zur Startseite</a>
       </div>
 
       <p id="validation" class="validation" role="status" aria-live="polite"></p>

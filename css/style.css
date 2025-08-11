@@ -1,348 +1,207 @@
-:root{
-  --bg: #f7f9fc;
-  --panel: #ffffff;
-  --panel-2: #f4f6fb;
-  --text: #0b1324;
-  --muted: #5a6a85;
-  --primary: #0ea5e9;
-  --primary-600: #0284c7;
-  --success: #16a34a;
-  --warn: #f59e0b;
-  --danger: #ef4444;
-  --border: #d6deeb;
-  --shadow: 0 8px 28px rgba(2, 8, 23, .06);
-  --radius: 14px;
-
-  --btn-radius: 12px;
-  --focus: 0 0 0 3px rgba(14,165,233,.25);
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-}
-
-*{ box-sizing: border-box; }
-html, body{ height: 100%; }
-body{
+body {
+  font-family: Arial, sans-serif;
+  background-color: #e8f4f7;
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+  padding: 0;
+  color: #003b4f;
+}
+main {
+  max-width: 700px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+h1 {
+  text-align: center;
+  color: #006677;
+}
+.page-header .subtitle {
+  text-align: center;
+  margin: .4rem 0 0 0;
+  color: #276a77;
 }
 
-main{
-  max-width: 960px;
-  margin: 32px auto 64px;
-  padding: 0 16px;
+/* Form-/Controls-Bereich */
+.controls { display: flex; flex-direction: column; }
+.controls .label, .controls legend { margin-top: 1rem; font-weight: bold; }
+
+input[type="datetime-local"] {
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #003b4f;
+  background:#fff;
 }
 
-h1{ font-size: 1.8rem; margin: 0 0 10px; }
-h2{ font-size: 1.25rem; margin: 1.4em 0 .6em; }
-.subtitle{ color: var(--muted); margin: 0 0 22px; }
-.hidden{ display: none !important; }
-
-/* Links */
-a{ color: var(--primary-600); text-decoration: none; }
-a:hover{ text-decoration: underline; }
-
-/* ==========================================================================
-   Generic Buttons
-   ========================================================================== */
-.btn{
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: .5rem;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text);
-  border-radius: var(--btn-radius);
-  padding: .65rem .9rem;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  transition: border-color .15s ease, transform .05s ease;
-}
-.btn:hover{ border-color: var(--primary); }
-.btn:active{ transform: translateY(1px); }
-.btn:focus-visible{ outline: none; box-shadow: var(--focus); }
-
-.btn-primary{
-  background: var(--primary);
-  border-color: transparent;
-  color: #fff;
-  font-weight: 700;
-}
-.btn-primary:hover{ background: var(--primary-600); }
-.btn-ghost{
-  background: transparent;
-  border-color: var(--border);
-  color: var(--muted);
-}
-
-/* Icon-Button (Zurück etc.) */
-.icon-button{
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text);
-  border-radius: var(--btn-radius);
-  padding: .6rem .9rem;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-}
-.icon-button:hover{ border-color: var(--primary); }
-.icon-button:focus-visible{ outline: none; box-shadow: var(--focus); }
-
-/* Footer-Link-Buttons (Startseite) */
-.footer-buttons{
-  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px;
-}
-.footer-buttons button{
-  border: 1px solid var(--border);
-  background: var(--panel);
-  border-radius: var(--btn-radius);
-  padding: .55rem .9rem;
-  cursor: pointer;
-}
-.footer-buttons button:hover{ border-color: var(--primary); }
-
-/* Floating Feedback-Button */
-.feedback-button{
-  position: fixed;
-  right: 18px; bottom: 18px;
-  display: inline-flex; align-items: center; gap: .55rem;
-  padding: .55rem .8rem;
+/* Segmented Radiogroup (≥ 1 Jahr / < 1 Jahr) */
+.segmented {
+  display: inline-flex;
+  background: #eef6f8;
   border-radius: 999px;
-  background: #ff6b6b;
-  color: #fff !important;
-  box-shadow: var(--shadow);
-  z-index: 60;
+  padding: .25rem;
+  gap: .25rem;
 }
-.feedback-button img{ width: 22px; height: 22px; display: inline-block; }
-.feedback-button:hover{ filter: brightness(.95); text-decoration: none; }
-
-/* ==========================================================================
-   Startseite – Panda-Menü
-   ========================================================================== */
-.panda-buttons{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap: 12px;
+.segmented__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
-.panda-btn{
-  display: grid; place-items: center;
-  gap: 10px;
-  padding: 16px 12px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+.segmented__item input[type="radio"] {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+}
+.segmented__item span {
+  display: inline-block;
+  padding: .45rem .9rem;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #276a77;
   cursor: pointer;
-  box-shadow: var(--shadow);
+  user-select: none;
+}
+.segmented__item input[type="radio"]:checked + span {
+  background: #0aa3b4;
+  color: #fff;
+}
+
+/* Buttons (kompatibel zu .btn, .btn-primary, .btn-ghost) */
+.actions { margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn {
+  flex: 1 0 auto;
+  padding: 0.7rem 1rem;
+  border: none;
+  background-color: #0099a8;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
   text-align: center;
 }
-.panda-btn img{ width: 64px; height: 64px; object-fit: contain; }
-.panda-btn span{ font-weight: 600; }
-.panda-btn:hover{ border-color: var(--primary); }
+.btn:hover { background-color: #007c8c; }
+.btn-primary { background-color: #0099a8; }
+.btn-ghost {
+  background: #f0f9fb;
+  color: #006677;
+  border: 1px solid #b3e0ea;
+}
+.btn-ghost:hover { background:#e0f3f6; }
 
-/* ==========================================================================
-   Gemeinsame Formular-Utilities
-   ========================================================================== */
-.field{ display: grid; gap: 6px; margin: 10px 0; }
-label{ font-weight: 600; }
-input[type="datetime-local"], select{
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--border);
+/* Status-/Validierungstext */
+.validation {
+  margin-top: .7rem;
+  color: #c47b00;
+  font-weight: 600;
+}
+
+/* ===== Panel + Karten für die Essensphasen ===== */
+
+
+.phase-list {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f0f9fb;
+  border-radius: 8px;
+  border-left: 4px solid #0099a8;
+}
+
+/* Grid für Karten */
+#phase-list {
+  display: grid;
+  gap: 12px;
+}
+
+/* Karte: Panda links – Inhalt – (optional) Timer rechts */
+.phase-card {
+  display: grid;
+  grid-template-columns: 86px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0.9rem 1rem;
+  background: #fff;                        
   border-radius: 10px;
-  padding: .6rem .7rem;
-  outline: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-left: 4px solid #0099a8;             
 }
-input[type="datetime-local"]{ -webkit-appearance: none; } /* iOS/Safari Glättung */
-input[type="datetime-local"]:focus, select:focus{ box-shadow: var(--focus); }
-
-/* Block für Substanz-Seite */
-.selection-block{
-  display: grid; gap: 12px;
-  padding: 12px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+.phase-card__media { display:flex; align-items:center; justify-content:center; }
+.phase-card__img   { width: 72px; height: 72px; object-fit: contain; }
+.phase-card__content { display: block; }
+.phase-card__title {
+  margin: 0 0 .2rem 0; color:#006677; font-size: 1.05rem; font-weight: bold;
+}
+.phase-card__meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .65rem;
+  color:#006677;
 }
 
-/* ==========================================================================
-   INFO-Seite (Erklärinhalte)
-   ========================================================================== */
-.info-panda{ width: 96px; height: 96px; object-fit: contain; display: block; margin: 8px 0 12px; }
-.info-section{ margin-top: 10px; }
-.info-section h2{ color: #0ea5e9; margin-top: 1.4em; }
-.highlight{
-  background: #eaf7fd;
-  padding: .75rem 1rem;
-  border-left: 4px solid #0ea5e9;
-  border-radius: 6px;
-}
-.info-list{
-  margin: .4rem 0 .8rem;
-  padding-left: 0;
-  list-style-position: inside;
-}
-.info-section li{ margin-left: 0; }
-
-/* ==========================================================================
-   Calculator (neue Ausgabe mit Panda-Karten)
-   ========================================================================== */
-.controls{
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  box-shadow: var(--shadow);
-  margin-bottom: 16px;
-}
-.validation{ color: var(--warn); min-height: 1.4em; }
-
-.segmented{
-  display: inline-flex; gap: 6px;
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: 999px; padding: 4px;
-}
-.segmented__item{ position: relative; }
-.segmented__item input{
-  position: absolute; inset: 0; opacity: 0; cursor: pointer;
-}
-.segmented__item span{
-  display: inline-block; padding: 8px 14px; border-radius: 999px;
-  color: var(--muted); user-select: none;
-}
-.segmented__item input:checked + span{
-  background: var(--primary); color: #fff; font-weight: 700;
-}
-
-/* Kartenliste */
-.phase-list{ display: grid; gap: 12px; }
-
-/* Karte */
-.phase-card{
-  display: grid; grid-template-columns: 112px 1fr;
-  align-items: stretch;
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.phase-card__media{
-  display: grid; place-items: center;
-  background: var(--panel-2);
-  border-right: 1px solid var(--border);
-  min-height: 96px;
-}
-.phase-card__img{
-  width: 96px; height: 96px; object-fit: contain; image-rendering: auto;
-}
-.phase-card__content{ padding: 14px 16px; }
-.phase-card__title{ font-size: 1.06rem; margin: 0 0 8px; font-weight: 700; }
-.phase-card__note{ color: var(--muted); margin: 6px 0 0; }
-
-.phase-card__meta{
-  display: grid; grid-template-columns: 1fr auto auto;
-  gap: 10px 16px; align-items: center;
-}
-.timer{
-  font-family: var(--mono);
+/* Timer rechts als Badge */
+.timer {
   font-variant-numeric: tabular-nums;
-  font-size: 1.22rem; font-weight: 800;
-}
-.until{ color: var(--muted); }
-.info-btn{
-  justify-self: end;
-  border: 1px solid var(--border);
-  padding: 6px 10px;
+  font-weight: bold;
+  padding: .25rem .6rem;
   border-radius: 999px;
-  background: var(--panel-2);
-  color: var(--text);
+  background:#e0f3f6;
+  min-width: 88px;
+  text-align: center;
+}
+.timer-alt { font-size: .85rem; opacity: .8; }
+.until     { font-size: .92rem; opacity: .85; }
+
+/* Info-Button (kompatibel zu alter "info-button"-Klasse) */
+.info-btn,
+button.info-button {
+  background: none;
+  border: none;
+  color: #006677;
   cursor: pointer;
+  padding: 0;
+  font-size: .95rem;
 }
-.info-btn:hover{ border-color: var(--primary); }
-.info-btn:focus-visible{ outline: none; box-shadow: var(--focus); }
+.info-btn:hover,
+button.info-button:hover { text-decoration: underline; }
 
-/* Zustände */
-.phase-card.state-allowed{ border-color: #cfe6f6; }
-.phase-card.state-ending-soon{ border-color: #f3d9a6; box-shadow: 0 0 0 3px rgba(245,158,11,.18); }
-.phase-card.state-ending-soon .timer{ color: var(--warn); }
-.phase-card.state-expired{ opacity: .6; border-color: #e8c4c4; }
-.phase-card.state-expired .timer{ color: var(--danger); }
+/* Zustände: erlaubt / bald Ende / abgelaufen – Farbakzent am Rand */
+.phase-card.state-allowed     { border-left-color:#0099a8; }
+.phase-card.state-ending-soon { border-left-color:#ff9f1c; }
+.phase-card.state-expired     { border-left-color:#C81E1E; opacity: .6; }
 
-/* ==========================================================================
-   Calculator – alte Klassen (Abwärtskompatibilität)
-   ========================================================================== */
-.buttons{ display: flex; gap: 8px; margin-top: 10px; }
-.info-button{
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--panel-2);
-  cursor: pointer;
-}
-.info-button:hover{ border-color: var(--primary); }
-
-.panda-container{
-  display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0;
-}
-.panda{ width: 72px; height: 72px; object-fit: contain; }
-
-/* Kleine Infobox (alte Ausgabe) */
-.regel-infobox{
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: .6rem .8rem;
-  margin: .5rem 0;
+/* Hinweistext (z. B. bei NPO-Karte ohne Timer) */
+.phase-card .phase-card__note {
+  margin: .2rem 0 0 0;
+  color:#006677; font-size: .95rem;
 }
 
-/* ==========================================================================
-   Modals – bereinigt (neues Muster + Abwärtskompatibilität)
-   ========================================================================== */
-.modal{
-  position: fixed; inset: 0;
-  display: none;                /* standardmäßig unsichtbar */
-  place-items: center;
-  z-index: 1000;                /* über Feedback-Button */
+/* ===== Modal (Klassen gemappt auf deine HTML-Struktur) ===== */
+.modal { position: fixed; inset: 0; display: none; z-index: 1000; }
+.modal.is-open { display: block; }
+.modal__backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.5);
 }
-.modal.is-open{ display: grid; }            /* neues Muster */
-.modal.hidden{ display: none !important; }  /* falls alte Seiten .hidden setzen */
-
-.modal-content,          /* alt */
-.modal__dialog{          /* neu */
-  position: relative;
-  width: min(560px, 92vw);
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px 16px 18px;
-  box-shadow: var(--shadow);
+.modal__dialog {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff; padding: 2rem; border-radius: 8px;
+  width: 80%; max-width: 600px; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 0 12px rgba(0,0,0,0.2);
 }
-.modal__backdrop{ position: absolute; inset: 0; background: rgba(2,8,23,.45); }
-
-.close-button,          /* alt */
-.modal__close{          /* neu */
-  position: absolute; right: 8px; top: 8px;
-  border: 1px solid var(--border);
-  background: var(--panel-2);
-  color: var(--text);
-  border-radius: 10px; width: 32px; height: 32px; cursor: pointer;
-  display: grid; place-items: center;
-}
-.modal__title{ margin: 0 0 8px; }
-.modal__body{ color: var(--text); }
-.bullet{ margin: 0; padding-left: 18px; }
-
-/* ==========================================================================
-   Responsive
-   ========================================================================== */
-@media (max-width: 860px){
-  .panda-buttons{ grid-template-columns: 1fr; }
+.modal__title { margin: 0 0 1rem 0; color:#006677; }
+.modal__close {
+  position: absolute; right: .75rem; top: .5rem;
+  background: none; border: 0; font-size: 1.5rem; cursor: pointer; color:#003b4f;
 }
 
-@media (max-width: 680px){
-  .phase-card{ grid-template-columns: 88px 1fr; }
-  .phase-card__img{ width: 72px; height: 72px; }
-  .phase-card__meta{ grid-template-columns: 1fr; gap: 6px; }
-  .info-btn{ justify-self: start; }
+/* A11y-Helfer */
+.sr-only {
+  position: absolute !important;
+  width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+/* Responsive: Timer unter den Text bei schmalen Screens */
+@media (max-width: 520px) {
+  .phase-card { grid-template-columns: 64px 1fr; }
+  .phase-card__img { width: 60px; height: 60px; }
+  .phase-card__meta { margin-top: .35rem; }
 }

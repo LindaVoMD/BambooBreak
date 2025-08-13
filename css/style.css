@@ -20,10 +20,13 @@ main {
 }
 h1 { text-align: center; color: #006677; }
 
-/* Untertitel als "Block" mit mehr Abstand */
+/* Mehr Abstand zwischen H1 und Infokasten */
+.page-header h1 { margin-bottom: 1.25rem; }
+
+/* Untertitel (Infokasten) – etwas mehr Abstand */
 .page-header .subtitle {
   display: block;
-  margin: .9rem auto 1.25rem auto;        /* MEHR Abstand */
+  margin: 1.25rem auto 1.25rem auto;
   padding: .85rem 1rem;
   max-width: 46rem;
   background: #eef9fc;
@@ -34,8 +37,24 @@ h1 { text-align: center; color: #006677; }
 
 /* ===== Form-/Controls-Bereich ===== */
 .controls { display: flex; flex-direction: column; }
-.controls .label, .controls legend { margin-top: 1rem; font-weight: bold; }
+.controls .label, .controls legend { margin-top: 0; font-weight: bold; }
 
+/* Umrahmte Eingabeblöcke (Alter, Datum) */
+.field--boxed {
+  padding: 1rem;
+  border: 1px solid #bfe3ea;
+  border-radius: 10px;
+  background: #f7fcfd;
+  margin-top: 1rem;
+}
+.field__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+/* Datumseingabe */
 input[type="datetime-local"] {
   padding: 0.5rem;
   margin-top: 0.3rem;
@@ -43,7 +62,38 @@ input[type="datetime-local"] {
   border: 1px solid #ccc;
   color: #003b4f;
   background:#fff;
+  width: 100%;
 }
+
+/* Tooltip-Hülle für das Datumsfeld */
+.input-with-tooltip {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+.input-with-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  transform: translateY(8px);
+  background: #003b4f;
+  color: #fff;
+  padding: .5rem .65rem;
+  border-radius: 6px;
+  font-size: .85rem;
+  line-height: 1.2;
+  white-space: normal;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease;
+  width: max(60%, 260px);
+  z-index: 20;
+}
+/* Tooltip sichtbar bei Hover/Focus */
+.input-with-tooltip:hover::after,
+.input-with-tooltip:focus-within::after { opacity: 1; }
 
 /* Segmented Radiogroup */
 .segmented {
@@ -66,17 +116,22 @@ input[type="datetime-local"] {
 }
 .segmented__item input[type="radio"]:checked + span { background: #0aa3b4; color: #fff; }
 
-/* Alters-Info: Fragezeichen-Icon */
-.icon-help {
-  margin-left: .5rem;
-  width: 28px; height: 28px;
+/* Einheitlicher ?-Badge-Stil (Hover/Klick öffnet Modal) */
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 1px solid #0aa3b4;
-  color: #0aa3b4; background: #f0f9fb;
-  display: inline-flex; align-items: center; justify-content: center;
+  background: #f0f9fb;
+  color: #0aa3b4;
+  font-weight: 800;
   cursor: pointer;
+  flex: 0 0 28px;
 }
-.icon-help:hover { background:#e0f3f6; }
+.info-badge:hover { background:#e0f3f6; }
 
 /* Buttons */
 .actions { margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
@@ -97,7 +152,8 @@ input[type="datetime-local"] {
 .btn-ghost { background: #f0f9fb; color: #006677; border: 1px solid #b3e0ea; }
 .btn-ghost:hover { background:#e0f3f6; }
 
-/* Icon-Button (für "Zurück zur Startseite" wie auf anderen Seiten) */
+/* Icon-Button (Zurück zur Startseite) – Position steuerst du in HTML/CSS separat
+   Wenn du ihn fix unten links haben willst, ergänze position:fixed; bottom/left. */
 .icon-button {
   background: none;
   border: none;
@@ -158,25 +214,24 @@ input[type="datetime-local"] {
   padding-top: 1rem;
   border-top: 1px solid #ccc;
 }
-
-.footer-buttons > button {
-  flex: 0 0 auto;
-}
+.footer-buttons > button { flex: 0 0 auto; }
+.actions--footer { justify-content: center; }
+.actions--footer .btn { flex: 0 0 auto; }
 
 /* ===== Panel + Karten (Calculator) ===== */
 .phase-list {
   margin-top: 2rem;
-  padding: 1.75rem 1.5rem;               /* luftiger */
+  padding: 1.75rem 1.5rem;
   background-color: #f0f9fb;
   border-radius: 8px;
-  border-left: 4px solid #0099a8;
+  border-left: 8px solid #0099a8;
 }
 #phase-list { display: grid; gap: 16px; }
 
-/* Karte: Panda größer – Text – rechts keine Änderung */
+/* Karte */
 .phase-card {
   display: grid;
-  grid-template-columns: 100px 1fr auto; /* Panda größer */
+  grid-template-columns: 115px 1fr auto;
   align-items: center;
   gap: 12px;
   padding: 1.1rem 1.2rem;
@@ -186,14 +241,14 @@ input[type="datetime-local"] {
   border-left: 4px solid #0099a8;
 }
 .phase-card__media { display:flex; align-items:center; justify-content:center; }
-.phase-card__img   { width: 88px; height: 88px; object-fit: contain; } /* größer */
+.phase-card__img   { width: 101px; height: 101px; object-fit: contain; } /* ~+15% */
 .phase-card__content { display: block; }
 .phase-card__title { margin: 0 0 .4rem 0; color:#006677; font-size: 1.12rem; font-weight: bold; }
 
-/* Timer-Zeile und Detail darunter */
+/* Timer + Detail */
 .phase-card__meta {
   display: flex;
-  flex-direction: column;        /* Timer oben, Detail darunter */
+  flex-direction: column;
   align-items: flex-start;
   gap: .35rem;
   color:#006677;
@@ -209,18 +264,10 @@ input[type="datetime-local"] {
 .timer-text { font-variant-numeric: tabular-nums; }
 .timer-detail { font-size: .92rem; opacity: .85; }
 
-/* Info-Chips unter den Details */
-.info-chips { display:flex; flex-wrap:wrap; gap:.4rem .5rem; margin-top:.5rem; }
-.info-chip {
-  display: inline-flex; align-items: center; gap:.35rem;
-  padding:.35rem .55rem; border-radius: 999px;
-  background:#eef9fc; border:1px solid #b3e0ea;
-  color:#006677; cursor:pointer;
-}
-.info-chip::before { content:"?"; font-weight:700; }
-.info-chip:hover { background:#e0f3f6; }
+/* Info-Badges in Karten */
+.info-chips { display:flex; gap:.5rem; margin-top:.5rem; }
 
-/* Zustände: Farbakzent am Rand */
+/* Zustandsfarben */
 .phase-card.state-allowed     { border-left-color:#0099a8; }
 .phase-card.state-ending-soon { border-left-color:#ff9f1c; }
 .phase-card.state-expired     { border-left-color:#C81E1E; opacity: .6; }
@@ -250,6 +297,6 @@ input[type="datetime-local"] {
 
 /* Responsive */
 @media (max-width: 520px) {
-  .phase-card { grid-template-columns: 72px 1fr; }
-  .phase-card__img { width: 64px; height: 64px; }
+  .phase-card { grid-template-columns: 84px 1fr; }
+  .phase-card__img { width: 74px; height: 74px; }
 }

@@ -74,8 +74,7 @@ input[type="datetime-local"] {
 .input-with-tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: 0;
-  top: 100%;
+  left: 0; top: 100%;
   transform: translateY(8px);
   background: #003b4f;
   color: #fff;
@@ -121,8 +120,7 @@ input[type="datetime-local"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 28px; height: 28px;
   border-radius: 50%;
   border: 1px solid #0aa3b4;
   background: #f0f9fb;
@@ -132,6 +130,16 @@ input[type="datetime-local"] {
   flex: 0 0 28px;
 }
 .info-badge:hover { background:#e0f3f6; }
+.info-badge:focus-visible {
+  outline: 2px solid #0aa3b4;
+  outline-offset: 2px;
+}
+
+/* Kompakter Badge für die Titelzeile */
+.info-badge--sm {
+  width: 24px; height: 24px; font-size: .9rem;
+  flex: 0 0 24px;
+}
 
 /* Buttons */
 .actions { margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
@@ -151,9 +159,9 @@ input[type="datetime-local"] {
 .btn-primary { background-color: #0099a8; }
 .btn-ghost { background: #f0f9fb; color: #006677; border: 1px solid #b3e0ea; }
 .btn-ghost:hover { background:#e0f3f6; }
+a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
 
-/* Icon-Button (Zurück zur Startseite) – Position steuerst du in HTML/CSS separat
-   Wenn du ihn fix unten links haben willst, ergänze position:fixed; bottom/left. */
+/* Icon-Button (Zurück zur Startseite) */
 .icon-button {
   background: none;
   border: none;
@@ -206,6 +214,7 @@ input[type="datetime-local"] {
 .feedback-button:hover { background-color: #e68a00; transform: scale(1.05); }
 @media (max-width:768px) { .feedback-button { font-size: .9rem; padding: .7em .9em; gap: .4em; } }
 
+/* Footer-Buttons im Button-Look */
 .footer-buttons {
   display: flex;
   justify-content: center;
@@ -224,7 +233,7 @@ input[type="datetime-local"] {
   padding: 1.75rem 1.5rem;
   background-color: #f0f9fb;
   border-radius: 8px;
-  border-left: 8px solid #0099a8;
+  border-left: 4px solid #0099a8;
 }
 #phase-list { display: grid; gap: 16px; }
 
@@ -238,11 +247,18 @@ input[type="datetime-local"] {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  border-left: 4px solid #0099a8;
+  border-left: 8px solid #0099a8;
 }
 .phase-card__media { display:flex; align-items:center; justify-content:center; }
-.phase-card__img   { width: 101px; height: 101px; object-fit: contain; } /* ~+15% */
+.phase-card__img   { width: 101px; height: 101px; object-fit: contain; }
 .phase-card__content { display: block; }
+
+/* Titelzeile: Text + kompaktes ? */
+.phase-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
 .phase-card__title { margin: 0 0 .4rem 0; color:#006677; font-size: 1.12rem; font-weight: bold; }
 
 /* Timer + Detail */
@@ -258,14 +274,35 @@ input[type="datetime-local"] {
   padding: .35rem .7rem;
   border-radius: 999px;
   background:#e0f3f6;
-  display: inline-flex; align-items: center; gap: .35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
 }
-.timer::before { content: "⏱️"; }
-.timer-text { font-variant-numeric: tabular-nums; }
-.timer-detail { font-size: .92rem; opacity: .85; }
 
-/* Info-Badges in Karten */
-.info-chips { display:flex; gap:.5rem; margin-top:.5rem; }
+/* Kein Emoji mehr */
+.timer::before { content: none; }
+
+/* SVG-Uhr */
+.timer svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Sekundenzeiger dreht sich kontinuierlich */
+.timer .seconds-hand {
+  transform-origin: 12px 12px;
+  animation: rotate-seconds 60s linear infinite;
+}
+
+@keyframes rotate-seconds {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Barrierefreiheit: Bewegungen auf Wunsch deaktivieren */
+@media (prefers-reduced-motion: reduce) {
+  .timer .seconds-hand { animation: none; }
+}
 
 /* Zustandsfarben */
 .phase-card.state-allowed     { border-left-color:#0099a8; }

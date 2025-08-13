@@ -22,9 +22,10 @@
       ]
     },
     "smallBeikost": {
-      "title": "Was ist eine kleine Portion Beikost?",
+      "title": "Was ist eine kleine Portion Beikost und Milch?",
       "items": [
-        "ca. 1/2 Standardportion Brei"
+        "ca. 1/2 Standardportion Brei",
+        "Kuhmilch, Formularmilch können bis 4h vor OP getrunken werden"
       ]
     }
   },
@@ -67,4 +68,5 @@
     }
   }
 }
+
 

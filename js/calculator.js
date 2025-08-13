@@ -1,8 +1,9 @@
 /* calculator.js – OP-Termin / Essensphasen (modular, JSON-getrieben)
-   - Lädt Regeln aus data/fastingrules.json
-   - Timer als "⏱️ dd Tage hh Stunden mm Minuten" bzw. "<24h: hh Stunden mm Minuten"
-   - Unter dem Timer eine Detailzeile: "bis HH:MM Uhr am DD.MM.YY (bis X Stunde(n) vor OP)"
-   - Info-Buttons als sichtbare "Chips" mit ?-Icon
+   Änderungen:
+   - Alter-Info und Phasen-Infos nur noch als einheitliche ?-Badges (Hover/Klick → Modal)
+   - Datums-Hinweistext („Bitte Datum & Uhrzeit …“) als Tooltip via CSS (kein <small>)
+   - Pandabilder ~15% größer (Layout via CSS)
+   - Bestehende Timer-/Detailanzeige unverändert
 */
 
 (function () {
@@ -43,7 +44,7 @@
   const hoursUntil  = (opDate) => (opDate.getTime() - Date.now()) / 36e5;
   const deadlineFor = (opDate, hoursBefore) => new Date(opDate.getTime() - hoursBefore * 3600 * 1000);
 
-  // Humanisiertes Timerformat (kein "und")
+  // Humanisiertes Timerformat
   function fmtHuman(msLeft) {
     if (msLeft < 0) msLeft = 0;
     const totalMin = Math.floor(msLeft / 60000);
@@ -128,12 +129,12 @@
       const meta = document.createElement("div");
       meta.className = "phase-card__meta";
 
-      // Timer-Badge
+      // Timer-Badge – Zeit wird im Tick geschrieben
       const timer = document.createElement("div");
       timer.className = "timer";
       timer.dataset.deadline = String(until.getTime());
       timer.setAttribute("aria-live", "polite");
-      timer.innerHTML = `<span class="timer-text"></span>`;  // gefüllt im Ticker
+      timer.innerHTML = `<span class="timer-text"></span>`;
 
       // Detailzeile
       const detail = document.createElement("div");
@@ -145,14 +146,16 @@
       content.appendChild(meta);
     }
 
-    // Info-Chips
+    // Info-Badges (Icon-only ?)
     const chips = document.createElement("div");
     chips.className = "info-chips";
     if (infoKey && RULES.infoTexts?.[infoKey]) {
       const chip = document.createElement("button");
       chip.type = "button";
-      chip.className = "info-chip";
-      chip.textContent = RULES.infoTexts[infoKey].title || "Info";
+      chip.className = "info-badge";
+      chip.setAttribute("aria-label", RULES.infoTexts[infoKey].title || "Info");
+      chip.setAttribute("title", RULES.infoTexts[infoKey].title || "Info");
+      chip.textContent = "?";
       chip.addEventListener("click", () => openModalFromInfoKey(infoKey));
       chips.appendChild(chip);
     }
@@ -218,9 +221,11 @@
       const msLeft = deadline - now;
 
       const span = el.querySelector(".timer-text");
-      if (span) span.textContent = fmtHuman(msLeft);
-      else      el.textContent   = fmtHuman(msLeft);
+      const text = fmtHuman(msLeft);
+      if (span) span.textContent = text;
+      else      el.textContent   = text;
 
+      // Karte einfärben
       const card = el.closest(".phase-card");
       card.classList.remove("state-ending-soon", "state-expired", "state-allowed");
       if (msLeft <= 0) card.classList.add("state-expired");
@@ -245,14 +250,15 @@
   });
   window.addEventListener("beforeunload", stopTicking);
 
-  // Alters-Info (Fragezeichen)
+  // Alters-Info (Badge mit "?")
   const ageHintBtn = document.getElementById("age-hint");
   if (ageHintBtn) {
+    ageHintBtn.classList.add("info-badge");   // sicherstellen, dass der Stil greift
+    ageHintBtn.textContent = "?";
     ageHintBtn.addEventListener("click", () => {
       showModal(
         "Warum das Alter wichtig ist",
-        "<p>Für Kinder <strong>unter 1 Jahr</strong> gelten angepasste Fastenregeln für säuglingsgerechte Nahrung. " +
-        "Darum unterscheiden wir zwischen ≥ 1 Jahr und &lt; 1 Jahr.</p>"
+        "<ul class='bullet'><li>Für Kinder <strong>unter 1 Jahr</strong> gelten angepasste Fastenregeln (Beikost/Milch).</li><li>Daher unterscheiden wir zwischen ≥ 1 Jahr und &lt; 1 Jahr.</li></ul>"
       );
     });
   }

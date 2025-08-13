@@ -8,50 +8,64 @@
 </head>
 <body>
   <main class="container">
-    <header class="page-header">
-      <h1>OP-Termin und Essensphasen</h1>
-      <p class="subtitle">Nach Eingabe des Termins der OP/ des Eingriffs in Narkose werden die relevanten Fastenrichtlinien mit Timer ausgegeben.</p>
-    </header>
+<header class="page-header">
+  <h1>OP-Termin und Essensphasen</h1>
+  <p class="subtitle">Nach Eingabe des Termins der OP/ des Eingriffs in Narkose werden die relevanten Fastenrichtlinien mit Timer ausgegeben.</p>
+</header>
 
-    <section class="controls" aria-labelledby="controls-title">
-      <h2 id="controls-title" class="sr-only">Eingaben</h2>
+<section class="controls" aria-labelledby="controls-title">
+  <h2 id="controls-title" class="sr-only">Eingaben</h2>
 
-      <div class="field">
-        <label class="label">Alter des Kindes</label>
-        <div class="segmented" role="radiogroup" aria-label="Altersgruppe">
-          <label class="segmented__item">
-            <input type="radio" name="ageGroup" value="gte1" checked />
-            <span>≥ 1 Jahr</span>
-          </label>
-          <label class="segmented__item">
-            <input type="radio" name="ageGroup" value="lt1" />
-            <span>&lt; 1 Jahr</span>
-          </label>
-        </div>
-        <!-- Info-Link zur Alterslogik -->
-        <button id="age-hint" class="info-btn" type="button">
-          Warum ist das Alter wichtig?
-        </button>
-      </div>
+  <!-- Alter: umrahmt + Fragezeichen-Badge -->
+  <div class="field field--boxed">
+    <div class="field__row">
+      <label class="label">Alter des Kindes</label>
+      <button id="age-hint" class="info-badge" type="button"
+              aria-label="Warum ist das Alter wichtig?"
+              title="Warum ist das Alter wichtig?">?</button>
+    </div>
 
-      <div class="field">
-        <label for="opDateTime" class="label">OP-Termin</label>
-        <input id="opDateTime" type="datetime-local" required aria-describedby="opHelp" autocomplete="off" />
-        <small id="opHelp" class="subtitle">Bitte Datum & Uhrzeit des geplanten Eingriffs wählen.</small>
-      </div>
+    <div class="segmented" role="radiogroup" aria-label="Altersgruppe">
+      <label class="segmented__item">
+        <input type="radio" name="ageGroup" value="gte1" checked />
+        <span>≥ 1 Jahr</span>
+      </label>
+      <label class="segmented__item">
+        <input type="radio" name="ageGroup" value="lt1" />
+        <span>&lt; 1 Jahr</span>
+      </label>
+    </div>
+  </div>
 
-      <div class="actions">
-        <button id="calcBtn" class="btn btn-primary" type="button">Aktualisieren</button>
-        <button id="resetBtn" class="btn" type="button">Zurücksetzen</button>
-      </div>
+  <!-- Datum/Uhrzeit: umrahmt + Tooltip statt Hinweiszeile -->
+  <div class="field field--boxed">
+    <label for="opDateTime" class="label">OP-Termin</label>
+    <div class="input-with-tooltip"
+         data-tooltip="Bitte Datum &amp; Uhrzeit des geplanten Eingriffs wählen.">
+      <input id="opDateTime" type="datetime-local" required autocomplete="off"
+             aria-label="OP-Termin (Datum und Uhrzeit)" />
+    </div>
+  </div>
 
-      <p id="validation" class="validation" role="status" aria-live="polite"></p>
-    </section>
+  <!-- Aktionen -->
+  <div class="actions">
+    <button id="calcBtn" class="btn btn-primary" type="button">Aktualisieren</button>
+    <button id="resetBtn" class="btn" type="button">Zurücksetzen</button>
+  </div>
 
-    <section id="phase-list" class="phase-list" aria-labelledby="phase-list-title">
-      <h2 id="phase-list-title" class="sr-only">Essensphasen</h2>
-      <!-- Karten werden per JS aus data/fastingrules.json gerendert -->
-    </section>
+  <p id="validation" class="validation" role="status" aria-live="polite"></p>
+</section>
+
+<section id="phase-list" class="phase-list" aria-labelledby="phase-list-title">
+  <h2 id="phase-list-title" class="sr-only">Essensphasen</h2>
+  <!-- Karten via JS -->
+</section>
+
+
+    <!-- Zurück-Button wie bei anderen Seiten -->
+    <button onclick="location.href='index.html'" class="icon-button">
+      Zurück zur Startseite
+    </button>
   </main>
 
   <!-- Info-Modal -->
@@ -65,11 +79,5 @@
   </div>
 
   <script src="js/calculator.js"></script>
-<div class="page-actions">
-  <button onclick="location.href='index.html'" class="icon-button">Zurück zur Startseite</button>
-</div>
-  </main>
 </body>
 </html>
-
-

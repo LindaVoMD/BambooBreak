@@ -258,7 +258,7 @@
     ageHintBtn.addEventListener("click", () => {
       showModal(
         "Warum das Alter wichtig ist",
-        "<ul class='bullet'><li>Für Kinder <strong>unter 1 Jahr</strong> gelten angepasste Fastenregeln (Beikost/Milch).</li><li>Daher unterscheiden wir zwischen ≥ 1 Jahr und &lt; 1 Jahr.</li></ul>"
+        "<ul class='bullet'><li>Für Kinder <strong>unter 1 Jahr</strong> gelten angepasste Fastenregeln (Beikost/Milch).</li></ul>"
       );
     });
   }
@@ -282,3 +282,4 @@
     }
   });
 })();
+

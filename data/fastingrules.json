@@ -5,13 +5,19 @@
     "lightMeal": {
       "title": "Was ist eine leichte Mahlzeit?",
       "items": [
-        "z. B. 1 Toast mit Marmelade, 1 Apfel, 1 Banane, 1 Becher Joghurt oder ein Becher Milch/ Kakao"
+        "z. B. 1 Toast mit Marmelade",
+        "1 Apfel",
+        "1 Banane",
+        "1 Becher Joghurt",
+        "oder",
+        "ein Becher Milch/ Kakao"
       ]
     },
     "clearFluids": {
       "title": "Was ist eine klare Flüssigkeit?",
       "items": [
-        "Wasser, (gesüßter) Tee",
+        "Wasser",
+        "(gesüßter) Tee",
         "klarer Fruchtsaft ohne Fruchtfleisch"
       ]
     },
@@ -61,3 +67,4 @@
     }
   }
 }
+

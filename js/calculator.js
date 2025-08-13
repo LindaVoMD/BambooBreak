@@ -1,9 +1,8 @@
 /* calculator.js – OP-Termin / Essensphasen (modular, JSON-getrieben)
-   Änderungen:
-   - Alter-Info und Phasen-Infos nur noch als einheitliche ?-Badges (Hover/Klick → Modal)
-   - Datums-Hinweistext („Bitte Datum & Uhrzeit …“) als Tooltip via CSS (kein <small>)
-   - Pandabilder ~15% größer (Layout via CSS)
-   - Bestehende Timer-/Detailanzeige unverändert
+   - Lädt Regeln aus data/fastingrules.json
+   - Titelzeile: "Phasen-Titel" + ?-Badge (öffnet Modal)
+   - Timer: animierte SVG-Uhr + verbleibende Zeit
+   - Detailzeile: "bis HH:MM Uhr am DD.MM.YY (bis X Stunde(n) vor OP)"
 */
 
 (function () {
@@ -31,7 +30,8 @@
   // ---------- Utils ----------
   const pad = (n) => String(n).padStart(2, "0");
   const toHM = (d) => d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-  const normalizeMax = (v) => (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
+  const normalizeMax = (v) =>
+    (v === null || typeof v === "undefined") ? Number.POSITIVE_INFINITY : v;
 
   function parseLocalDateTime(value) {
     if (!value) return null;
@@ -44,7 +44,7 @@
   const hoursUntil  = (opDate) => (opDate.getTime() - Date.now()) / 36e5;
   const deadlineFor = (opDate, hoursBefore) => new Date(opDate.getTime() - hoursBefore * 3600 * 1000);
 
-  // Humanisiertes Timerformat
+  // Humanisiertes Timerformat (kein "und")
   function fmtHuman(msLeft) {
     if (msLeft < 0) msLeft = 0;
     const totalMin = Math.floor(msLeft / 60000);
@@ -96,7 +96,9 @@
     modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   }
-  modal.addEventListener("click", e => { if (e.target.classList.contains("modal__backdrop")) closeModal(); });
+  modal.addEventListener("click", e => {
+    if (e.target.classList.contains("modal__backdrop")) closeModal();
+  });
   modal.querySelector(".modal__close")?.addEventListener("click", closeModal);
   $$("[data-close]", modal).forEach(el => el.addEventListener("click", closeModal));
 
@@ -119,24 +121,48 @@
     // Content
     const content = document.createElement("div");
     content.className = "phase-card__content";
+
+    // Titelzeile: Titel + ?-Badge
+    const titleRow = document.createElement("div");
+    titleRow.className = "phase-card__title-row";
+
     const h = document.createElement("h3");
     h.className = "phase-card__title";
     h.textContent = title;
-    content.appendChild(h);
+    titleRow.appendChild(h);
+
+    if (infoKey && RULES?.infoTexts?.[infoKey]) {
+      const infoBtn = document.createElement("button");
+      infoBtn.type = "button";
+      infoBtn.className = "info-badge info-badge--sm";
+      infoBtn.setAttribute("aria-label", RULES.infoTexts[infoKey].title || "Info");
+      infoBtn.setAttribute("title", RULES.infoTexts[infoKey].title || "Info");
+      infoBtn.textContent = "?";
+      infoBtn.addEventListener("click", () => openModalFromInfoKey(infoKey));
+      titleRow.appendChild(infoBtn);
+    }
+    content.appendChild(titleRow);
 
     // Meta (Timer + Detail)
     if (!noTimer && until) {
       const meta = document.createElement("div");
       meta.className = "phase-card__meta";
 
-      // Timer-Badge – Zeit wird im Tick geschrieben
+      // Timer-Badge mit animierter SVG-Uhr
       const timer = document.createElement("div");
       timer.className = "timer";
       timer.dataset.deadline = String(until.getTime());
       timer.setAttribute("aria-live", "polite");
-      timer.innerHTML = `<span class="timer-text"></span>`;
+      timer.innerHTML = `
+        <svg class="clock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"
+             fill="none" stroke="#006677" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="12" x2="12" y2="6"></line>                 <!-- Minutenzeiger -->
+          <line class="seconds-hand" x1="12" y1="12" x2="16" y2="12"></line> <!-- Sekundenzeiger -->
+        </svg>
+        <span class="timer-text"></span>
+      `;
 
-      // Detailzeile
       const detail = document.createElement("div");
       detail.className = "timer-detail";
       const cutoffText = `${cutoffH} ${plural(cutoffH, "Stunde", "Stunden")}`;
@@ -145,21 +171,6 @@
       meta.append(timer, detail);
       content.appendChild(meta);
     }
-
-    // Info-Badges (Icon-only ?)
-    const chips = document.createElement("div");
-    chips.className = "info-chips";
-    if (infoKey && RULES.infoTexts?.[infoKey]) {
-      const chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "info-badge";
-      chip.setAttribute("aria-label", RULES.infoTexts[infoKey].title || "Info");
-      chip.setAttribute("title", RULES.infoTexts[infoKey].title || "Info");
-      chip.textContent = "?";
-      chip.addEventListener("click", () => openModalFromInfoKey(infoKey));
-      chips.appendChild(chip);
-    }
-    if (chips.childElementCount) content.appendChild(chips);
 
     card.append(media, content);
     return card;
@@ -221,11 +232,10 @@
       const msLeft = deadline - now;
 
       const span = el.querySelector(".timer-text");
-      const text = fmtHuman(msLeft);
-      if (span) span.textContent = text;
-      else      el.textContent   = text;
+      if (span) span.textContent = fmtHuman(msLeft);
+      else      el.textContent   = fmtHuman(msLeft);
 
-      // Karte einfärben
+      // Zustandsfarben
       const card = el.closest(".phase-card");
       card.classList.remove("state-ending-soon", "state-expired", "state-allowed");
       if (msLeft <= 0) card.classList.add("state-expired");
@@ -253,12 +263,10 @@
   // Alters-Info (Badge mit "?")
   const ageHintBtn = document.getElementById("age-hint");
   if (ageHintBtn) {
-    ageHintBtn.classList.add("info-badge");   // sicherstellen, dass der Stil greift
-    ageHintBtn.textContent = "?";
     ageHintBtn.addEventListener("click", () => {
       showModal(
         "Warum das Alter wichtig ist",
-        "<ul class='bullet'><li>Für Kinder <strong>unter 1 Jahr</strong> gelten angepasste Fastenregeln (Beikost/Milch).</li></ul>"
+        "<ul class='bullet'><li>Für Kinder <strong>unter 1 Jahr</strong> gelten angepasste Fastenregeln.</li><li>Daher unterscheiden wir zwischen ≥ 1 Jahr und &lt; 1 Jahr.</li></ul>"
       );
     });
   }
@@ -282,4 +290,3 @@
     }
   });
 })();
-

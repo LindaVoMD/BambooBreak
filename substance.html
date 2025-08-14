@@ -19,13 +19,12 @@
     <section class="controls" aria-labelledby="controls-title">
       <h2 id="controls-title" class="sr-only">Eingaben</h2>
 
-      <!-- Altersgruppe (kompakt gerahmt + Segment-Schalter) -->
+   
       <div class="field field--boxed">
         <div class="field__row">
           <label class="label">Alter des Kindes</label>
         </div>
         <div class="segmented" role="radiogroup" aria-label="Altersgruppe">
-          <!-- Wichtig: gleiche Namen/Werte wie zuvor, damit substance.js weiter funktioniert -->
           <label class="segmented__item">
             <input type="radio" name="infant" value="no" checked />
             <span>≥ 1 Jahr</span>
@@ -50,10 +49,8 @@
         <label for="unterkat-select" id="unterkat-label" class="label hidden">Unterkategorie</label>
         <select id="unterkat-select" class="hidden"></select>
       </div>
-
-      <!-- Ergebnisbereich im gleichen Panel-Stil wie beim Calculator -->
+      
       <section class="phase-list" aria-live="polite">
-        <div id="substanz-result" class="hidden"></div>
       </section>
     </section>
 
@@ -66,5 +63,6 @@
   <script src="js/substance.js"></script>
 </body>
 </html>
+
 
 

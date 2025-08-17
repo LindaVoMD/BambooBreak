@@ -97,6 +97,10 @@ input[type="datetime-local"] {
   opacity: 0 !important;
   visibility: hidden !important;
 
+  @media (hover:hover) and (pointer: fine) {
+    .input-with-tooltip:hover::after {opacity: 1 }
+}
+
 /* Segmented Radiogroup */
 .segmented {
   display: inline-flex;
@@ -151,7 +155,7 @@ input[type="datetime-local"] {
   padding: 0.7rem 1rem;
   border: none;
   background-color: #0099a8;
-  color: #'001f26;
+  color: #001f26;
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
@@ -340,5 +344,6 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   .phase-card { grid-template-columns: 84px 1fr; }
   .phase-card__img { width: 74px; height: 74px; }
 }
+
 
 

@@ -92,13 +92,23 @@ input[type="datetime-local"] {
 }
 /* Tooltip sichtbar bei Hover/Focus */
 .input-with-tooltip:hover::after,
-.input-with-tooltip:focus-within::after { opacity: 1; }
+.input-with-tooltip:focus-within::after {
+  opacity: 1;
+}
+/* Tooltip per JS ausblenden, wenn Wert gesetzt */
 .input-with-tooltip.tooltip-hidden::after {
   opacity: 0 !important;
   visibility: hidden !important;
-
-  @media (hover:hover) and (pointer: fine) {
-    .input-with-tooltip:hover::after {opacity: 1 }
+}
+/* Sicherheit: auch Hover/Focus bei .tooltip-hidden unterdrücken */
+.input-with-tooltip.tooltip-hidden:hover::after,
+.input-with-tooltip.tooltip-hidden:focus-within::after {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+/* Nur Geräte mit Maus bekommen Hover-Tooltip (Touch bleibt unberührt) */
+@media (hover: hover) and (pointer: fine) {
+  .input-with-tooltip:hover::after { opacity: 1; }
 }
 
 /* Segmented Radiogroup */
@@ -285,27 +295,19 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   align-items: center;
   gap: .35rem;
 }
-
 /* Kein Emoji mehr */
 .timer::before { content: none; }
-
 /* SVG-Uhr */
-.timer svg {
-  width: 20px;
-  height: 20px;
-}
-
+.timer svg { width: 20px; height: 20px; }
 /* Sekundenzeiger dreht sich kontinuierlich */
 .timer .seconds-hand {
   transform-origin: 12px 12px;
   animation: rotate-seconds 60s linear infinite;
 }
-
 @keyframes rotate-seconds {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
-
 /* Barrierefreiheit: Bewegungen auf Wunsch deaktivieren */
 @media (prefers-reduced-motion: reduce) {
   .timer .seconds-hand { animation: none; }
@@ -344,6 +346,3 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   .phase-card { grid-template-columns: 84px 1fr; }
   .phase-card__img { width: 74px; height: 74px; }
 }
-
-
-

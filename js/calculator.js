@@ -250,6 +250,17 @@
   const onAnyChange = () => render();
   ageRadios.forEach(r => r.addEventListener("change", onAnyChange));
   opInput.addEventListener("change", onAnyChange);
+const tooltipWrapper = opInput.closest(".input-with-tooltip");
+
+function updateTooltipVisibility() {
+  if (!tooltipWrapper) return;
+  if (opInput.value) {
+    tooltipWrapper.classList.add("tooltip-hidden");
+  } else {
+    tooltipWrapper.classList.remove("tooltip-hidden");
+  }
+}
+   
   calcBtn.addEventListener("click", (e) => { e.preventDefault(); render(); });
   resetBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -290,4 +301,5 @@
     }
   });
 })();
+
 

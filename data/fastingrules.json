@@ -1,7 +1,14 @@
 {
-  "version": "1.1.0",
-  "updated": "2025-08-11",
+  "version": "1.2.0",
+  "updated": "2025-08-22",
   "infoTexts": {
+    "normalMeal": {
+      "title": "Was ist eine normale Mahlzeit?",
+      "items": [
+        "z. B. Brot/Brötchen mit Belag, Müsli, warme Hauptmahlzeit",
+        "Hinweis für < 1 Jahr: Beikost (z. B. Brei) zählt hier als 'normale Mahlzeit' und folgt denselben Zeiten."
+      ]
+    },
     "lightMeal": {
       "title": "Was ist eine leichte Mahlzeit?",
       "items": [
@@ -10,7 +17,8 @@
         "1 Banane",
         "1 Becher Joghurt",
         "oder",
-        "ein Becher Milch/ Kakao"
+        "ein Becher Milch/ Kakao",
+        "Hinweis für < 1 Jahr: 1 kleine Portion Beikost fällt unter 'leichte Mahlzeit'."
       ]
     },
     "clearFluids": {
@@ -21,11 +29,11 @@
         "klarer Fruchtsaft ohne Fruchtfleisch"
       ]
     },
-    "smallBeikost": {
-      "title": "Was ist eine kleine Portion Beikost und Milch?",
+    "breastmilk": {
+      "title": "Muttermilch",
       "items": [
-        "ca. 1/2 Standardportion Brei",
-        "Kuhmilch, Formularmilch können bis 4h vor OP getrunken werden"
+        "Gilt nur für < 1 Jahr.",
+        "Muttermilch (gestillt, abgepumpt oder angereichert) ist bis 3 Stunden vor OP erlaubt."
       ]
     }
   },
@@ -40,34 +48,31 @@
         { "min": 0, "max": 1, "phases": ["fasting"] }
       ],
       "phaseDefs": {
-        "free":   { "title": "Freies Essen möglich",       "imageSrc": "assets/panda_eats2.png",   "imageAlt": "Panda isst" },
-        "normal": { "title": "Normale Mahlzeit möglich",   "imageSrc": "assets/panda_eats.png",    "imageAlt": "Panda isst" },
-        "light":  { "title": "Leichte Mahlzeit möglich",   "imageSrc": "assets/panda_apple.png",   "imageAlt": "Panda mit Apfel", "infoKey": "lightMeal" },
-        "clear":  { "title": "Klare Flüssigkeit möglich",  "imageSrc": "assets/panda_drinks.png",  "imageAlt": "Panda trinkt",     "infoKey": "clearFluids" },
-        "fasting":{ "title": "Bitte nüchtern bleiben",     "imageSrc": "assets/panda_fasting.png", "imageAlt": "Panda fastet",     "noTimer": true }
+        "free":    { "title": "Freies Essen möglich",       "imageSrc": "assets/panda_eats2.png",   "imageAlt": "Panda isst" },
+        "normal":  { "title": "Normale Mahlzeit möglich",   "imageSrc": "assets/panda_eats.png",    "imageAlt": "Panda isst", "infoKey": "normalMeal" },
+        "light":   { "title": "Leichte Mahlzeit möglich",   "imageSrc": "assets/panda_apple.png",   "imageAlt": "Panda mit Apfel", "infoKey": "lightMeal" },
+        "clear":   { "title": "Klare Flüssigkeit möglich",  "imageSrc": "assets/panda_drinks.png",  "imageAlt": "Panda trinkt", "infoKey": "clearFluids" },
+        "fasting": { "title": "Bitte nüchtern bleiben",     "imageSrc": "assets/panda_fasting.png", "imageAlt": "Panda fastet", "noTimer": true }
       }
     },
     "lt1": {
-      "cutoffs": { "free": 8, "beikost": 6, "smallBeikost": 4, "breastmilk": 3, "clear": 1 },
+      "cutoffs": { "free": 8, "normal": 6, "light": 4, "breastmilk": 3, "clear": 1 },
       "windows": [
-        { "min": 8, "max": null, "phases": ["free", "beikost", "smallBeikost", "breastmilk", "clear"] },
-        { "min": 6, "max": 8, "phases": ["beikost", "smallBeikost", "breastmilk", "clear"] },
-        { "min": 4, "max": 6, "phases": ["smallBeikost", "breastmilk", "clear"] },
-        { "min": 3, "max": 4, "phases": ["breastmilk", "clear"] },
-        { "min": 1, "max": 3, "phases": ["clear"] },
-        { "min": 0, "max": 1, "phases": ["fasting"] }
+        { "min": 8, "max": null, "phases": ["free", "normal", "light", "breastmilk", "clear"] },
+        { "min": 6, "max": 8,   "phases": ["normal", "light", "breastmilk", "clear"] },
+        { "min": 4, "max": 6,   "phases": ["light", "breastmilk", "clear"] },
+        { "min": 3, "max": 4,   "phases": ["breastmilk", "clear"] },
+        { "min": 1, "max": 3,   "phases": ["clear"] },
+        { "min": 0, "max": 1,   "phases": ["fasting"] }
       ],
       "phaseDefs": {
-        "free":         { "title": "Freies Essen möglich",                   "imageSrc": "assets/panda_eats2.png",     "imageAlt": "Panda isst" },
-        "beikost":      { "title": "Beikost & Milch möglich",                "imageSrc": "assets/panda_porridge.png",  "imageAlt": "Panda mit Brei" },
-        "smallBeikost": { "title": "Kleine Portion Beikost & Milch möglich", "imageSrc": "assets/panda_porridge2.png",  "imageAlt": "Panda mit Brei", "infoKey": "smallBeikost" },
-        "breastmilk":   { "title": "Muttermilch möglich",                    "imageSrc": "assets/panda_nursed.png",    "imageAlt": "Panda wird gestillt" },
-        "clear":        { "title": "Klare Flüssigkeit möglich",              "imageSrc": "assets/panda_drinks.png",    "imageAlt": "Panda trinkt", "infoKey": "clearFluids" },
-        "fasting":      { "title": "Bitte nüchtern bleiben",                 "imageSrc": "assets/panda_fasting.png",   "imageAlt": "Panda fastet", "noTimer": true }
+        "free":       { "title": "Freies Essen möglich",       "imageSrc": "assets/panda_eats2.png",   "imageAlt": "Panda isst" },
+        "normal":     { "title": "Normale Mahlzeit möglich",   "imageSrc": "assets/panda_eats.png",    "imageAlt": "Panda isst", "infoKey": "normalMeal" },
+        "light":      { "title": "Leichte Mahlzeit möglich",   "imageSrc": "assets/panda_apple.png",   "imageAlt": "Panda mit Apfel", "infoKey": "lightMeal" },
+        "breastmilk": { "title": "Muttermilch möglich",        "imageSrc": "assets/panda_nursed.png",  "imageAlt": "Panda wird gestillt", "infoKey": "breastmilk" },
+        "clear":      { "title": "Klare Flüssigkeit möglich",  "imageSrc": "assets/panda_drinks.png",  "imageAlt": "Panda trinkt", "infoKey": "clearFluids" },
+        "fasting":    { "title": "Bitte nüchtern bleiben",     "imageSrc": "assets/panda_fasting.png", "imageAlt": "Panda fastet", "noTimer": true }
       }
     }
   }
 }
-
-
-

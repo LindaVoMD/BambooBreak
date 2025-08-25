@@ -68,7 +68,7 @@
       "phaseDefs": {
         "free":       { "title": "Freies Essen möglich",       "imageSrc": "assets/panda_eats2.png",   "imageAlt": "Panda isst" },
         "normal":     { "title": "Normale Mahlzeit möglich",   "imageSrc": "assets/panda_eats.png",    "imageAlt": "Panda isst", "infoKey": "normalMeal" },
-        "light":      { "title": "Leichte Mahlzeit möglich",   "imageSrc": "assets/panda_apple.png",   "imageAlt": "Panda mit Apfel", "infoKey": "lightMeal" },
+        "light":      { "title": "Leichte Mahlzeit möglich",   "imageSrc": "assets/panda_porridge2.png",   "imageAlt": "Panda mit Brei", "infoKey": "lightMeal" },
         "breastmilk": { "title": "Muttermilch möglich",        "imageSrc": "assets/panda_nursed.png",  "imageAlt": "Panda wird gestillt", "infoKey": "breastmilk" },
         "clear":      { "title": "Klare Flüssigkeit möglich",  "imageSrc": "assets/panda_drinks.png",  "imageAlt": "Panda trinkt", "infoKey": "clearFluids" },
         "fasting":    { "title": "Bitte nüchtern bleiben",     "imageSrc": "assets/panda_fasting.png", "imageAlt": "Panda fastet", "noTimer": true }
@@ -76,4 +76,5 @@
     }
   }
 }
+
 

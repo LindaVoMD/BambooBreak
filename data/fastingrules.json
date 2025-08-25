@@ -18,7 +18,7 @@
         "1 Becher Joghurt",
         "oder",
         "ein Becher Milch/ Kakao",
-        "Hinweis für < 1 Jahr: 1 kleine Portion Beikost fällt unter 'leichte Mahlzeit'."
+        "Hinweis für < 1 Jahr: 1 kleine Portion Beikost (z.B Brei oder Kompott) fällt unter 'leichte Mahlzeit'."
       ]
     },
     "clearFluids": {
@@ -76,3 +76,4 @@
     }
   }
 }
+

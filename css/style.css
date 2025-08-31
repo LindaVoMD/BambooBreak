@@ -64,17 +64,28 @@ input[type="datetime-local"] {
   background:#fff;
   width: 100%;
 }
+input[type="datetime-local"]:focus-visible {
+  outline: 2px solid #003b4f;
+  outline-offset: 2px;
+}
 
-/* Tooltip-Hülle für das Datumsfeld */
+/* Tooltip – Variante 3 (rein CSS, via :has() & Validität)
+   Voraussetzung im Markup:
+   <div class="input-with-tooltip" data-tooltip="Bitte Datum …">
+     <input type="datetime-local" required …>
+   </div>
+*/
 .input-with-tooltip {
   position: relative;
   display: inline-block;
   width: 100%;
 }
+/* Grundzustand: Tooltip unsichtbar */
 .input-with-tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: 0; top: 100%;
+  left: 0;
+  top: 100%;
   transform: translateY(8px);
   background: #003b4f;
   color: #fff;
@@ -84,31 +95,29 @@ input[type="datetime-local"] {
   line-height: 1.2;
   white-space: normal;
   box-shadow: 0 4px 12px rgba(0,0,0,.15);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .15s ease;
-  width: max(60%, 260px);
+  width: min(420px, 90%);
   z-index: 20;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .15s ease, visibility .15s ease;
 }
-/* Tooltip sichtbar bei Hover/Focus */
-.input-with-tooltip:hover::after,
-.input-with-tooltip:focus-within::after {
+/* Anzeigen NUR, solange das Input ungültig ist und der Wrapper Fokus enthält */
+.input-with-tooltip:has(input:invalid):focus-within::after {
   opacity: 1;
+  visibility: visible;
 }
-/* Tooltip per JS ausblenden, wenn Wert gesetzt */
-.input-with-tooltip.tooltip-hidden::after {
+/* Sobald gültig, dauerhaft aus – selbst bei Fokus/Hover */
+.input-with-tooltip:has(input:valid)::after {
   opacity: 0 !important;
   visibility: hidden !important;
 }
-/* Sicherheit: auch Hover/Focus bei .tooltip-hidden unterdrücken */
-.input-with-tooltip.tooltip-hidden:hover::after,
-.input-with-tooltip.tooltip-hidden:focus-within::after {
-  opacity: 0 !important;
-  visibility: hidden !important;
-}
-/* Nur Geräte mit Maus bekommen Hover-Tooltip (Touch bleibt unberührt) */
+/* Optional: bei Maus-Hover zeigen, solange ungültig */
 @media (hover: hover) and (pointer: fine) {
-  .input-with-tooltip:hover::after { opacity: 1; }
+  .input-with-tooltip:has(input:invalid):hover::after {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 /* Segmented Radiogroup */
@@ -130,7 +139,16 @@ input[type="datetime-local"] {
   cursor: pointer;
   user-select: none;
 }
-.segmented__item input[type="radio"]:checked + span { background: #0aa3b4; color: #fff; }
+/* A11y Fokus sichtbar machen */
+.segmented__item input[type="radio"]:focus-visible + span {
+  outline: 2px solid #003b4f;
+  outline-offset: 2px;
+}
+/* Checked: AA-konformer Kontrast (dunkler Hintergrund + Weiß) */
+.segmented__item input[type="radio"]:checked + span {
+  background: #006677;
+  color: #fff;
+}
 
 /* Einheitlicher ?-Badge-Stil (Hover/Klick öffnet Modal) */
 .info-badge {
@@ -151,7 +169,6 @@ input[type="datetime-local"] {
   outline: 2px solid #0aa3b4;
   outline-offset: 2px;
 }
-
 /* Kompakter Badge für die Titelzeile */
 .info-badge--sm {
   width: 24px; height: 24px; font-size: .9rem;
@@ -165,15 +182,16 @@ input[type="datetime-local"] {
   padding: 0.7rem 1rem;
   border: none;
   background-color: #0099a8;
-  color: #001f26;
+  color: #001f26;            /* AA auf normalem Zustand */
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
   text-decoration: none;
   text-align: center;
 }
-.btn:hover { background-color: #007c8c; }
-.btn-primary { background-color: #0099a8; }
+.btn:hover { background-color: #007c8c; color: #fff; } /* Hover: Weiß für AA */
+.btn:focus-visible { outline: 2px solid #003b4f; outline-offset: 2px; }
+.btn-primary { background-color: #0099a8; } /* optionaler Alias */
 .btn-ghost { background: #f0f9fb; color: #006677; border: 1px solid #b3e0ea; }
 .btn-ghost:hover { background:#e0f3f6; }
 a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
@@ -188,9 +206,10 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   padding: 0.5rem;
 }
 .icon-button:hover { text-decoration: underline; }
+.icon-button:focus-visible { outline: 2px solid #003b4f; outline-offset: 2px; }
 
-/* Status-/Validierungstext */
-.validation { margin-top: .7rem; color: #c47b00; font-weight: 600; }
+/* Status-/Validierungstext (AA) */
+.validation { margin-top: .7rem; color: #8a5a00; font-weight: 600; }
 
 /* ===== Panda-Buttons (Startseite etc.) ===== */
 .panda { max-width: 120px; height: auto; }
@@ -240,7 +259,7 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   padding-top: 1rem;
   border-top: 1px solid #ccc;
 }
-.footer-buttons > button { flex: 0 0 auto; }
+.footer-buttons > * { flex: 0 0 auto; } /* robuster für <a> und <button> */
 .actions--footer { justify-content: center; }
 .actions--footer .btn { flex: 0 0 auto; }
 
@@ -295,10 +314,9 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   align-items: center;
   gap: .35rem;
 }
-/* Kein Emoji mehr */
-.timer::before { content: none; }
-/* SVG-Uhr */
+.timer::before { content: none; }       /* Kein Emoji mehr */
 .timer svg { width: 20px; height: 20px; }
+
 /* Sekundenzeiger dreht sich kontinuierlich */
 .timer .seconds-hand {
   transform-origin: 12px 12px;
@@ -308,7 +326,7 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
-/* Barrierefreiheit: Bewegungen auf Wunsch deaktivieren */
+/* Bewegungen auf Wunsch deaktivieren */
 @media (prefers-reduced-motion: reduce) {
   .timer .seconds-hand { animation: none; }
 }
@@ -345,4 +363,5 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
 @media (max-width: 520px) {
   .phase-card { grid-template-columns: 84px 1fr; }
   .phase-card__img { width: 74px; height: 74px; }
+  .phase-card__meta { grid-column: 1 / -1; } /* sauberes Umbrechen */
 }

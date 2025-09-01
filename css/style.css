@@ -64,28 +64,17 @@ input[type="datetime-local"] {
   background:#fff;
   width: 100%;
 }
-input[type="datetime-local"]:focus-visible {
-  outline: 2px solid #003b4f;
-  outline-offset: 2px;
-}
 
-/* Tooltip – Variante 3 (rein CSS, via :has() & Validität)
-   Voraussetzung im Markup:
-   <div class="input-with-tooltip" data-tooltip="Bitte Datum …">
-     <input type="datetime-local" required …>
-   </div>
-*/
+/* Tooltip-Hülle für das Datumsfeld */
 .input-with-tooltip {
   position: relative;
   display: inline-block;
   width: 100%;
 }
-/* Grundzustand: Tooltip unsichtbar */
 .input-with-tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: 0;
-  top: 100%;
+  left: 0; top: 100%;
   transform: translateY(8px);
   background: #003b4f;
   color: #fff;
@@ -95,30 +84,15 @@ input[type="datetime-local"]:focus-visible {
   line-height: 1.2;
   white-space: normal;
   box-shadow: 0 4px 12px rgba(0,0,0,.15);
-  width: min(420px, 90%);
-  z-index: 20;
   opacity: 0;
-  visibility: hidden;
   pointer-events: none;
-  transition: opacity .15s ease, visibility .15s ease;
+  transition: opacity .15s ease;
+  width: max(60%, 260px);
+  z-index: 20;
 }
-/* Anzeigen NUR, solange das Input ungültig ist und der Wrapper Fokus enthält */
-.input-with-tooltip:has(input:invalid):focus-within::after {
-  opacity: 1;
-  visibility: visible;
-}
-/* Sobald gültig, dauerhaft aus – selbst bei Fokus/Hover */
-.input-with-tooltip:has(input:valid)::after {
-  opacity: 0 !important;
-  visibility: hidden !important;
-}
-/* Optional: bei Maus-Hover zeigen, solange ungültig */
-@media (hover: hover) and (pointer: fine) {
-  .input-with-tooltip:has(input:invalid):hover::after {
-    opacity: 1;
-    visibility: visible;
-  }
-}
+/* Tooltip sichtbar bei Hover/Focus */
+.input-with-tooltip:hover::after,
+.input-with-tooltip:focus-within::after { opacity: 1; }
 
 /* Segmented Radiogroup */
 .segmented {
@@ -139,16 +113,7 @@ input[type="datetime-local"]:focus-visible {
   cursor: pointer;
   user-select: none;
 }
-/* A11y Fokus sichtbar machen */
-.segmented__item input[type="radio"]:focus-visible + span {
-  outline: 2px solid #003b4f;
-  outline-offset: 2px;
-}
-/* Checked: AA-konformer Kontrast (dunkler Hintergrund + Weiß) */
-.segmented__item input[type="radio"]:checked + span {
-  background: #006677;
-  color: #fff;
-}
+.segmented__item input[type="radio"]:checked + span { background: #0aa3b4; color: #fff; }
 
 /* Einheitlicher ?-Badge-Stil (Hover/Klick öffnet Modal) */
 .info-badge {
@@ -169,6 +134,7 @@ input[type="datetime-local"]:focus-visible {
   outline: 2px solid #0aa3b4;
   outline-offset: 2px;
 }
+
 /* Kompakter Badge für die Titelzeile */
 .info-badge--sm {
   width: 24px; height: 24px; font-size: .9rem;
@@ -182,16 +148,15 @@ input[type="datetime-local"]:focus-visible {
   padding: 0.7rem 1rem;
   border: none;
   background-color: #0099a8;
-  color: #001f26;            /* AA auf normalem Zustand */
+  color: #'001f26;
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
   text-decoration: none;
   text-align: center;
 }
-.btn:hover { background-color: #007c8c; color: #fff; } /* Hover: Weiß für AA */
-.btn:focus-visible { outline: 2px solid #003b4f; outline-offset: 2px; }
-.btn-primary { background-color: #0099a8; } /* optionaler Alias */
+.btn:hover { background-color: #007c8c; }
+.btn-primary { background-color: #0099a8; }
 .btn-ghost { background: #f0f9fb; color: #006677; border: 1px solid #b3e0ea; }
 .btn-ghost:hover { background:#e0f3f6; }
 a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
@@ -206,10 +171,9 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   padding: 0.5rem;
 }
 .icon-button:hover { text-decoration: underline; }
-.icon-button:focus-visible { outline: 2px solid #003b4f; outline-offset: 2px; }
 
-/* Status-/Validierungstext (AA) */
-.validation { margin-top: .7rem; color: #8a5a00; font-weight: 600; }
+/* Status-/Validierungstext */
+.validation { margin-top: .7rem; color: #c47b00; font-weight: 600; }
 
 /* ===== Panda-Buttons (Startseite etc.) ===== */
 .panda { max-width: 120px; height: auto; }
@@ -259,7 +223,7 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   padding-top: 1rem;
   border-top: 1px solid #ccc;
 }
-.footer-buttons > * { flex: 0 0 auto; } /* robuster für <a> und <button> */
+.footer-buttons > button { flex: 0 0 auto; }
 .actions--footer { justify-content: center; }
 .actions--footer .btn { flex: 0 0 auto; }
 
@@ -314,19 +278,28 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
   align-items: center;
   gap: .35rem;
 }
-.timer::before { content: none; }       /* Kein Emoji mehr */
-.timer svg { width: 20px; height: 20px; }
+
+/* Kein Emoji mehr */
+.timer::before { content: none; }
+
+/* SVG-Uhr */
+.timer svg {
+  width: 20px;
+  height: 20px;
+}
 
 /* Sekundenzeiger dreht sich kontinuierlich */
 .timer .seconds-hand {
   transform-origin: 12px 12px;
   animation: rotate-seconds 60s linear infinite;
 }
+
 @keyframes rotate-seconds {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
-/* Bewegungen auf Wunsch deaktivieren */
+
+/* Barrierefreiheit: Bewegungen auf Wunsch deaktivieren */
 @media (prefers-reduced-motion: reduce) {
   .timer .seconds-hand { animation: none; }
 }
@@ -363,5 +336,26 @@ a.btn { display: inline-block; } /* für <a class="btn"> im Footer */
 @media (max-width: 520px) {
   .phase-card { grid-template-columns: 84px 1fr; }
   .phase-card__img { width: 74px; height: 74px; }
-  .phase-card__meta { grid-column: 1 / -1; } /* sauberes Umbrechen */
+}
+
+/* Address & iOS auto-link normalization */
+.legal-address {
+  font-style: normal;
+  margin: 0 0 1rem;
+  padding: 0;
+  text-indent: 0;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+a[href^="tel"], a[href^="mailto"] {
+  color: inherit !important;
+  text-decoration: none !important;
+  font: inherit !important;
+  line-height: inherit !important;
+}
+a[x-apple-data-detectors] {
+  color: inherit !important;
+  text-decoration: none !important;
+  font: inherit !important;
 }

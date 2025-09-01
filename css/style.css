@@ -65,16 +65,17 @@ input[type="datetime-local"] {
   width: 100%;
 }
 
-/* Tooltip-Hülle für das Datumsfeld */
 .input-with-tooltip {
   position: relative;
   display: inline-block;
   width: 100%;
 }
+/* Grundzustand: Tooltip unsichtbar */
 .input-with-tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: 0; top: 100%;
+  left: 0;
+  top: 100%;
   transform: translateY(8px);
   background: #003b4f;
   color: #fff;
@@ -84,15 +85,30 @@ input[type="datetime-local"] {
   line-height: 1.2;
   white-space: normal;
   box-shadow: 0 4px 12px rgba(0,0,0,.15);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .15s ease;
-  width: max(60%, 260px);
+  width: min(420px, 90%);
   z-index: 20;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .15s ease, visibility .15s ease;
 }
-/* Tooltip sichtbar bei Hover/Focus */
-.input-with-tooltip:hover::after,
-.input-with-tooltip:focus-within::after { opacity: 1; }
+/* Anzeigen NUR, solange das Input ungültig ist und der Wrapper Fokus enthält */
+.input-with-tooltip:has(input:invalid):focus-within::after {
+  opacity: 1;
+  visibility: visible;
+}
+/* Sobald gültig, dauerhaft aus – selbst bei Fokus/Hover */
+.input-with-tooltip:has(input:valid)::after {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+/* Optional: bei Maus-Hover zeigen, solange ungültig */
+@media (hover: hover) and (pointer: fine) {
+  .input-with-tooltip:has(input:invalid):hover::after {
+    opacity: 1;
+    visibility: visible;
+  }
+}
 
 /* Segmented Radiogroup */
 .segmented {
@@ -359,3 +375,4 @@ a[x-apple-data-detectors] {
   text-decoration: none !important;
   font: inherit !important;
 }
+
